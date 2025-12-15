@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystic Tarot Reader</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --card-width: 140px;
+            --card-height: 220px;
+            --card-width-sm: 100px;
+            --card-height-sm: 160px;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #0f172a;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+        }
+
+        h1, h2, h3, .tarot-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Card Styles */
+        .tarot-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            perspective: 1000px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .tarot-card {
+                width: var(--card-width-sm);
+                height: var(--card-height-sm);
+            }
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Reversed State Logic: 
+           If card is reversed, the content inside the 'front' face is rotated 180deg.
+           We apply this class to the content container, not the whole card, to keep text readable if desired,
+           but traditionally the whole image is flipped. Here we flip the inner front content. */
+        .card-content.reversed {
+            transform: rotate(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #fbbf24;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fbbf24' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .card-front {
+            background: #f1f5f9;
+            color: #1e293b;
+            transform: rotateY(180deg);
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .card-front.major { border-color: #a855f7; background: #faf5ff; }
+        .card-front.wands { border-color: #ef4444; background: #fef2f2; }
+        .card-front.cups { border-color: #3b82f6; background: #eff6ff; }
+        .card-front.swords { border-color: #eab308; background: #fefce8; }
+        .card-front.pentacles { border-color: #22c55e; background: #f0fdf4; }
+
+        /* Spread Layouts */
+        .spread-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        /* Celtic Cross Grid */
+        .celtic-cross-grid {
+            display: grid;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            /* Default to stacked for mobile */
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+
+        @media (min-width: 1024px) {
+            .celtic-cross-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                height: 700px;
+                /* Grid Map:
+                   .  .  5  .  .  10
+                   4 1/2 6  .  .  9
+                   .  3  .  .  .  8
+                   .  .  .  .  .  7
+                */
+            }
+            
+            .pos-1 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 1; }
+            .pos-2 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 2; transform: rotate(90deg) !important; opacity: 0.9; }
+            .pos-3 { grid-column: 2 / 4; grid-row: 3 / 4; justify-self: center; }
+            .pos-4 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; padding-right: 10px;}
+            .pos-5 { grid-column: 2 / 4; grid-row: 1 / 2; justify-self: center; }
+            .pos-6 { grid-column: 4 / 5; grid-row: 2 / 3; justify-self: start; padding-left: 10px;}
+            
+            .pos-7 { grid-column: 6; grid-row: 4; }
+            .pos-8 { grid-column: 6; grid-row: 3; }
+            .pos-9 { grid-column: 6; grid-row: 2; }
+            .pos-10 { grid-column: 6; grid-row: 1; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .suit-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+        }
+        
+        /* Scrollbar for modal/details */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="w-full p-6 text-center border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+        <h1 class="text-4xl text-amber-400 mb-2 font-bold tracking-wider">Arcane Tarot</h1>
+        <p class="text-slate-400 text-sm">Reveal your path through the cards</p>
+    </header>
+
+    <!-- Controls -->
+    <main class="w-full max-w-7xl flex flex-col items-center p-4">
+        <div class="flex flex-wrap justify-center gap-4 mb-8 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
+            <div class="flex flex-col">
+                <label class="text-xs text-amber-400 uppercase tracking-widest mb-1">Spread Type</label>
+                <select id="spread-select" class="bg-slate-900 text-slate-200 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                    <option value="3">Three Card Spread (Past, Present, Future)</option>
+                    <option value="10">Celtic Cross (Comprehensive)</option>
+                    <option value="1">Single Card (Daily Draw)</option>
+                </select>
+            </div>
+            
+            <button onclick="drawCards()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 px-8 rounded shadow-lg transition-all transform hover:scale-105 mt-auto h-[42px] flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> Divinate
+            </button>
+        </div>
+
+        <!-- Drawing Area -->
+        <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8">Shuffling the deck...</div>
+        
+        <div id="spread-area" class="w-full flex justify-center min-h-[500px]">
+            <!-- Cards will be injected here -->
+            <div class="text-center text-slate-500 mt-20">
+                <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                <p>Select a spread and click "Divinate" to begin.</p>
+            </div>
+        </div>
+
+        <!-- Interpretation Area -->
+        <div id="reading-area" class="w-full max-w-4xl mt-12 hidden">
+            <h2 class="text-2xl text-amber-400 mb-6 text-center border-b border-slate-700 pb-2">Reading Interpretation</h2>
+            <div id="reading-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Text interpretation will go here -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-6 text-slate-500 text-xs text-center w-full border-t border-slate-800">
+        <p>&copy; 2025 Arcane Tarot. All 78 Cards Included.</p>
+    </footer>
+
+    <script>
+        // --- Tarot Data ---
+        const suits = ['Wands', 'Cups', 'Swords', 'Pentacles'];
+        const ranks = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Page', 'Knight', 'Queen', 'King'];
+        const majorArcana = [
+            'The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor', 'The Hierophant', 'The Lovers', 'The Chariot',
+            'Strength', 'The Hermit', 'Wheel of Fortune', 'Justice', 'The Hanged Man', 'Death', 'Temperance', 'The Devil', 'The Tower',
+            'The Star', 'The Moon', 'The Sun', 'Judgement', 'The World'
+        ];
+
+        // Roman Numerals helper
+        function toRoman(num) {
+            const romans = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
+            return romans[num];
+        }
+
+        // Generate Deck
+        let fullDeck = [];
+        
+        // Add Major Arcana
+        majorArcana.forEach((name, index) => {
+            fullDeck.push({
+                id: `major-${index}`,
+                name: name,
+                type: 'Major',
+                suit: 'Major',
+                number: index,
+                roman: index === 0 ? '0' : toRoman(index),
+                icon: 'crown' // Default icon for Major
+            });
+        });
+
+        // Add Minor Arcana
+        suits.forEach(suit => {
+            ranks.forEach((rank, index) => {
+                let icon = 'circle';
+                if(suit === 'Wands') icon = 'flame';
+                if(suit === 'Cups') icon = 'droplet';
+                if(suit === 'Swords') icon = 'sword';
+                if(suit === 'Pentacles') icon = 'hexagon';
+
+                fullDeck.push({
+                    id: `${suit.toLowerCase()}-${index}`,
+                    name: `${rank} of ${suit}`,
+                    type: 'Minor',
+                    suit: suit,
+                    number: index + 1,
+                    roman: null,
+                    icon: icon
+                });
+            });
+        });
+
+        // Position meanings for spreads
+        const spreads = {
+            1: [
+                { name: "Daily Insight", desc: "The energy surrounding you today." }
+            ],
+            3: [
+                { name: "The Past", desc: "Influences from the past that still affect the situation." },
+                { name: "The Present", desc: "The current state of affairs and immediate challenges." },
+                { name: "The Future", desc: "The likely outcome if the current path is followed." }
+            ],
+            10: [
+                { name: "The Present", desc: "The heart of the matter." },
+                { name: "The Challenge", desc: "The obstacle crossing you (Upright or Reversed)." },
+                { name: "The Foundation", desc: "Subconscious influences or the root of the issue." },
+                { name: "The Past", desc: "Recent events that are passing away." },
+                { name: "The Crown", desc: "Your conscious goals and best potential outcome." },
+                { name: "The Future", desc: "Immediate future events." },
+                { name: "Self", desc: "Your attitude and stance towards the issue." },
+                { name: "Environment", desc: "How others see you or external influences." },
+                { name: "Hopes & Fears", desc: "Inner psychological state regarding the outcome." },
+                { name: "Outcome", desc: "The culmination of the reading." }
+            ]
+        };
+
+        // --- Logic ---
+
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            // While there remain elements to shuffle.
+            while (currentIndex != 0) {
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        async function drawCards() {
+            const spreadType = parseInt(document.getElementById('spread-select').value);
+            const spreadArea = document.getElementById('spread-area');
+            const loading = document.getElementById('loading');
+            const readingArea = document.getElementById('reading-area');
+            const readingContent = document.getElementById('reading-content');
+
+            // Reset UI
+            spreadArea.innerHTML = '';
+            readingArea.classList.add('hidden');
+            readingContent.innerHTML = '';
+            loading.classList.remove('hidden');
+
+            // Simulate Shuffle Delay
+            await new Promise(r => setTimeout(r, 600));
+            loading.classList.add('hidden');
+
+            // Logic
+            let deck = shuffle([...fullDeck]); // Copy and shuffle
+            let drawn = [];
+
+            // Container Class based on spread
+            if (spreadType === 10) {
+                spreadArea.className = 'celtic-cross-grid fade-in';
+            } else {
+                spreadArea.className = 'spread-container fade-in';
+            }
+
+            // Draw Cards
+            for(let i=0; i<spreadType; i++) {
+                let card = deck.pop();
+                let isReversed = Math.random() < 0.5; // 50% chance
+                drawn.push({ ...card, isReversed, positionName: spreads[spreadType][i].name, positionDesc: spreads[spreadType][i].desc });
+                
+                // Render Card HTML
+                const cardEl = createCardElement(card, isReversed, i, spreadType, spreads[spreadType][i].name);
+                spreadArea.appendChild(cardEl);
+
+                // Add to Reading section
+                const readingItem = document.createElement('div');
+                readingItem.className = 'bg-slate-800 p-4 rounded border border-slate-700 hover:border-amber-500 transition-colors';
+                readingItem.innerHTML = `
+                    <h3 class="text-amber-400 font-bold mb-1">${i+1}. ${spreads[spreadType][i].name}</h3>
+                    <p class="text-slate-400 text-sm mb-2 italic">${spreads[spreadType][i].desc}</p>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="font-bold text-lg text-slate-200">${card.name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded ${isReversed ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}">
+                            ${isReversed ? 'Reversed' : 'Upright'}
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-300">
+                        ${getCardMeaning(card, isReversed)}
+                    </p>
+                `;
+                readingContent.appendChild(readingItem);
+            }
+            
+            readingArea.classList.remove('hidden');
+            
+            // Re-initialize icons for new elements
+            lucide.createIcons();
+
+            // Auto scroll to cards
+            spreadArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function createCardElement(card, isReversed, index, spreadType, positionLabel) {
+            const wrapper = document.createElement('div');
+            // Add specific class for grid positioning if Celtic Cross
+            if (spreadType === 10) {
+                wrapper.classList.add(`pos-${index+1}`);
+                // Special handling for position 2 (Cross card) handled in CSS via pos-2 class
+            }
+            
+            wrapper.className += ` tarot-card group relative`;
+            
+            // Tooltip Label for position (visible on hover or desktop)
+            const label = document.createElement('div');
+            label.className = "absolute -top-8 left-0 right-0 text-center text-xs text-amber-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none";
+            label.innerText = `${index+1}. ${positionLabel}`;
+            wrapper.appendChild(label);
+
+            const inner = document.createElement('div');
+            inner.className = 'card-inner';
+            
+            // Back of card
+            const back = document.createElement('div');
+            back.className = 'card-face card-back';
+            back.innerHTML = `<div class="w-12 h-12 border-2 border-amber-400/30 rounded-full flex items-center justify-center"><div class="w-8 h-8 border border-amber-400/50 rotate-45"></div></div>`;
+
+            // Front of card
+            const front = document.createElement('div');
+            let suitClass = card.suit.toLowerCase();
+            if(card.type === 'Major') suitClass = 'major';
+            
+            front.className = `card-face card-front ${suitClass}`;
+            
+            // Inner content wrapper for reversal rotation
+            const content = document.createElement('div');
+            content.className = `card-content flex flex-col items-center justify-between h-full w-full py-2 ${isReversed ? 'reversed' : ''}`;
+            
+            // Card Top Number
+            const topNum = document.createElement('div');
+            topNum.className = "text-sm font-bold opacity-70";
+            topNum.innerText = card.roman ? card.roman : card.number;
+
+            // Card Icon
+            const iconDiv = document.createElement('div');
+            iconDiv.innerHTML = `<i data-lucide="${getIconName(card.suit)}" class="w-12 h-12 stroke-[1.5]"></i>`;
+            if (card.type === 'Major') iconDiv.innerHTML = `<i data-lucide="crown" class="w-12 h-12 stroke-[1.5] text-purple-600"></i>`;
+
+            // Card Name
+            const nameDiv = document.createElement('div');
+            nameDiv.className = "tarot-font text-center font-bold text-sm leading-tight";
+            nameDiv.innerText = card.name;
+
+            // Assemble
+            content.appendChild(topNum);
+            content.appendChild(iconDiv);
+            content.appendChild(nameDiv);
+            
+            front.appendChild(content);
+            inner.appendChild(back);
+            inner.appendChild(front);
+            wrapper.appendChild(inner);
+
+            // Flip Animation
+            setTimeout(() => {
+                inner.classList.add('is-flipped');
+            }, 100 + (index * 200)); // Staggered flip
+
+            return wrapper;
+        }
+
+        function getIconName(suit) {
+            switch(suit) {
+                case 'Wands': return 'flame';
+                case 'Cups': return 'glass-water'; // approximation
+                case 'Swords': return 'sword';
+                case 'Pentacles': return 'circle-dashed';
+                default: return 'star';
+            }
+        }
+
+        // Simple Keyword generator since we don't have a DB
+        function getCardMeaning(card, isReversed) {
+            const keywords = {
+                'Major': {
+                    'The Fool': ['New beginnings, innocence, spontaneity', 'Recklessness, risk-taking, naivety'],
+                    'The Magician': ['Manifestation, resourcefulness, power', 'Manipulation, poor planning, untapped talents'],
+                    'The High Priestess': ['Intuition, unconscious, inner voice', 'Hidden agendas, disconnected from intuition'],
+                    'The Empress': ['Femininity, beauty, nature, nurturing', 'Creative block, dependence on others'],
+                    'The Emperor': ['Authority, establishment, structure', 'Domination, excessive control, lack of discipline'],
+                    'The Hierophant': ['Spiritual wisdom, religious beliefs, tradition', 'Personal beliefs, freedom, challenging status quo'],
+                    'The Lovers': ['Love, harmony, relationships, choices', 'Self-love, disharmony, imbalance, misalignment'],
+                    'The Chariot': ['Control, willpower, success, action', 'Self-discipline, opposition, lack of direction'],
+                    'Strength': ['Courage, persuasion, influence, compassion', 'Inner strength, self-doubt, low energy, raw emotion'],
+                    'The Hermit': ['Soul-searching, introspection, being alone', 'Isolation, loneliness, withdrawal'],
+                    'Wheel of Fortune': ['Good luck, karma, life cycles, destiny', 'Bad luck, resistance to change, breaking cycles'],
+                    'Justice': ['Justice, fairness, truth, cause and effect', 'Unfairness, lack of accountability, dishonesty'],
+                    'The Hanged Man': ['Pause, surrender, letting go, new perspectives', 'Delays, resistance, stalling, indecision'],
+                    'Death': ['Endings, change, transformation, transition', 'Resistance to change, personal transformation'],
+                    'Temperance': ['Balance, moderation, patience, purpose', 'Imbalance, excess, self-healing, realignment'],
+                    'The Devil': ['Shadow self, attachment, addiction, restriction', 'Releasing limiting beliefs, exploring dark thoughts'],
+                    'The Tower': ['Sudden change, upheaval, chaos, revelation', 'Personal transformation, fear of change, averting disaster'],
+                    'The Star': ['Hope, faith, purpose, renewal, spirituality', 'Lack of faith, despair, self-trust, disconnection'],
+                    'The Moon': ['Illusion, fear, anxiety, subconscious, intuition', 'Release of fear, repressed emotion, inner confusion'],
+                    'The Sun': ['Positivity, fun, warmth, success, vitality', 'Inner child, feeling down, overly optimistic'],
+                    'Judgement': ['Judgement, rebirth, inner calling, absolution', 'Self-doubt, inner critic, ignoring the call'],
+                    'The World': ['Completion, integration, accomplishment, travel', 'Seeking personal closure, short-cuts, delays']
+                },
+                'Wands': ['Creativity, action, and passion.', 'Delays, lack of direction, or burnout.'],
+                'Cups': ['Emotions, relationships, and feelings.', 'Emotional loss, blocked creativity, or emptiness.'],
+                'Swords': ['Intellect, thoughts, and challenges.', 'Confusion, mental fog, or brutal honesty.'],
+                'Pentacles': ['Material wealth, career, and manifestation.', 'Financial loss, greed, or lack of planning.']
+            };
+
+            if (card.type === 'Major') {
+                const meanings = keywords.Major[card.name];
+                return isReversed ? meanings[1] : meanings[0];
+            } else {
+                // Generative generic meanings for minors to save space in this demo
+                // Ideally this would be a full database
+                const base = keywords[card.suit];
+                return isReversed ? `(Reversed) Blocked energy regarding ${base[1]}` : `Upright energy focused on ${base[0]}`;
+            }
+        }
+
+        // Init icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

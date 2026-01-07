@@ -111,42 +111,6 @@
             min-height: 400px;
         }
 
-        /* Celtic Cross Grid */
-        .celtic-cross-grid {
-            display: grid;
-            gap: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-            /* Default to stacked for mobile */
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        }
-
-        @media (min-width: 1024px) {
-            .celtic-cross-grid {
-                grid-template-columns: repeat(6, 1fr);
-                grid-template-rows: repeat(4, 1fr);
-                height: 700px;
-                /* Grid Map:
-                   .  .  5  .  .  10
-                   4 1/2 6  .  .  9
-                   .  3  .  .  .  8
-                   .  .  .  .  .  7
-                */
-            }
-            
-            .pos-1 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 1; }
-            .pos-2 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 2; transform: rotate(90deg) !important; opacity: 0.9; }
-            .pos-3 { grid-column: 2 / 4; grid-row: 3 / 4; justify-self: center; }
-            .pos-4 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; padding-right: 10px;}
-            .pos-5 { grid-column: 2 / 4; grid-row: 1 / 2; justify-self: center; }
-            .pos-6 { grid-column: 4 / 5; grid-row: 2 / 3; justify-self: start; padding-left: 10px;}
-            
-            .pos-7 { grid-column: 6; grid-row: 4; }
-            .pos-8 { grid-column: 6; grid-row: 3; }
-            .pos-9 { grid-column: 6; grid-row: 2; }
-            .pos-10 { grid-column: 6; grid-row: 1; }
-        }
-
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -184,7 +148,6 @@
                 <label class="text-xs text-amber-400 uppercase tracking-widest mb-1">Spread Type</label>
                 <select id="spread-select" class="bg-slate-900 text-slate-200 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
                     <option value="3">Three Card Spread (Past, Present, Future)</option>
-                    <option value="10">Celtic Cross (Comprehensive)</option>
                     <option value="1">Single Card (Daily Draw)</option>
                 </select>
             </div>
@@ -280,18 +243,6 @@
                 { name: "The Past", desc: "Influences from the past that still affect the situation." },
                 { name: "The Present", desc: "The current state of affairs and immediate challenges." },
                 { name: "The Future", desc: "The likely outcome if the current path is followed." }
-            ],
-            10: [
-                { name: "The Present", desc: "The heart of the matter." },
-                { name: "The Challenge", desc: "The obstacle crossing you (Upright or Reversed)." },
-                { name: "The Foundation", desc: "Subconscious influences or the root of the issue." },
-                { name: "The Past", desc: "Recent events that are passing away." },
-                { name: "The Crown", desc: "Your conscious goals and best potential outcome." },
-                { name: "The Future", desc: "Immediate future events." },
-                { name: "Self", desc: "Your attitude and stance towards the issue." },
-                { name: "Environment", desc: "How others see you or external influences." },
-                { name: "Hopes & Fears", desc: "Inner psychological state regarding the outcome." },
-                { name: "Outcome", desc: "The culmination of the reading." }
             ]
         };
 
@@ -333,11 +284,7 @@
             let drawn = [];
 
             // Container Class based on spread
-            if (spreadType === 10) {
-                spreadArea.className = 'celtic-cross-grid fade-in';
-            } else {
-                spreadArea.className = 'spread-container fade-in';
-            }
+            spreadArea.className = 'spread-container fade-in';
 
             // Draw Cards
             for(let i=0; i<spreadType; i++) {
@@ -379,11 +326,6 @@
 
         function createCardElement(card, isReversed, index, spreadType, positionLabel) {
             const wrapper = document.createElement('div');
-            // Add specific class for grid positioning if Celtic Cross
-            if (spreadType === 10) {
-                wrapper.classList.add(`pos-${index+1}`);
-                // Special handling for position 2 (Cross card) handled in CSS via pos-2 class
-            }
             
             wrapper.className += ` tarot-card group relative`;
             

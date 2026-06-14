@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystic Tarot Reader</title>
+    <title>Mystic Tarot Reader V2</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -60,10 +60,6 @@
             transform: rotateY(180deg);
         }
 
-        /* Reversed State Logic: 
-           If card is reversed, the content inside the 'front' face is rotated 180deg.
-           We apply this class to the content container, not the whole card, to keep text readable if desired,
-           but traditionally the whole image is flipped. Here we flip the inner front content. */
         .card-content.reversed {
             transform: rotate(180deg);
         }
@@ -111,23 +107,45 @@
             min-height: 400px;
         }
 
-        /* Animations */
+        /* Celtic Cross Grid */
+        .celtic-cross-grid {
+            display: grid;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+
+        @media (min-width: 1024px) {
+            .celtic-cross-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                height: 700px;
+            }
+            .pos-1 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 1; }
+            .pos-2 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 2; transform: rotate(90deg) !important; opacity: 0.9; }
+            .pos-3 { grid-column: 2 / 4; grid-row: 3 / 4; justify-self: center; }
+            .pos-4 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; padding-right: 10px;}
+            .pos-5 { grid-column: 2 / 4; grid-row: 1 / 2; justify-self: center; }
+            .pos-6 { grid-column: 4 / 5; grid-row: 2 / 3; justify-self: start; padding-left: 10px;}
+            .pos-7 { grid-column: 6; grid-row: 4; }
+            .pos-8 { grid-column: 6; grid-row: 3; }
+            .pos-9 { grid-column: 6; grid-row: 2; }
+            .pos-10 { grid-column: 6; grid-row: 1; }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
         .fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
-
         .suit-icon {
             width: 48px;
             height: 48px;
             margin-bottom: 8px;
         }
-        
-        /* Scrollbar for modal/details */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
@@ -135,44 +153,39 @@
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <!-- Header -->
     <header class="w-full p-6 text-center border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
         <h1 class="text-4xl text-amber-400 mb-2 font-bold tracking-wider">Arcane Tarot</h1>
         <p class="text-slate-400 text-sm">Reveal your path through the cards</p>
     </header>
 
-    <!-- Controls -->
     <main class="w-full max-w-7xl flex flex-col items-center p-4">
         <div class="flex flex-wrap justify-center gap-4 mb-8 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
             <div class="flex flex-col">
                 <label class="text-xs text-amber-400 uppercase tracking-widest mb-1">Spread Type</label>
                 <select id="spread-select" class="bg-slate-900 text-slate-200 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
-                    <option value="3">Three Card Spread (Past, Present, Future)</option>
-                    <option value="1">Single Card (Daily Draw)</option>
+                    <option value="3">Three Card Spread (Past, Present, Future/3 cards Yes or No)</option>
+                    <option value="10">Celtic Cross (Comprehensive)</option>
+                    <option value="1">Single Card (Daily Draw/1 card Yes or No)</option>
                 </select>
             </div>
-            
             <button onclick="drawCards()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 px-8 rounded shadow-lg transition-all transform hover:scale-105 mt-auto h-[42px] flex items-center gap-2">
                 <i data-lucide="sparkles" class="w-4 h-4"></i> Divinate
             </button>
         </div>
 
-        <!-- Drawing Area -->
-        <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8">Shuffling the deck...</div>
-        
         <div id="spread-area" class="w-full flex justify-center min-h-[500px]">
-            <!-- Cards will be injected here -->
-            <div class="text-center text-slate-500 mt-20">
-                <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                <p>Select a spread and click "Divinate" to begin.</p>
+            <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8">Shuffling the deck...</div>
+            <div id="cards-container" class="w-full flex justify-center">
+                <div class="text-center text-slate-500 mt-20">
+                    <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                    <p>Select a spread and click "Divinate" to begin.</p>
+                </div>
             </div>
         </div>
 
-        <!-- Interpretation Area -->
         <div id="reading-area" class="w-full max-w-4xl mt-12 hidden">
             <h2 class="text-2xl text-amber-400 mb-6 text-center border-b border-slate-700 pb-2">Reading Interpretation</h2>
             <div id="reading-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Text interpretation will go here -->
             </div>
         </div>
     </main>
@@ -182,59 +195,131 @@
     </footer>
 
     <script>
-        // --- Tarot Data ---
-        const suits = ['Wands', 'Cups', 'Swords', 'Pentacles'];
-        const ranks = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Page', 'Knight', 'Queen', 'King'];
-        const majorArcana = [
-            'The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor', 'The Hierophant', 'The Lovers', 'The Chariot',
-            'Strength', 'The Hermit', 'Wheel of Fortune', 'Justice', 'The Hanged Man', 'Death', 'Temperance', 'The Devil', 'The Tower',
-            'The Star', 'The Moon', 'The Sun', 'Judgement', 'The World'
-        ];
+        // --- Embedded Tarot Data (From tarot_cards.json) ---
+        const tarotData = {
+          "majorArcana": [
+            { "id": "major-0", "number": 0, "name": "The Fool", "upright": "New beginnings, taking risks, innocence, spontaneity, free spirit", "reversed": "Recklessness, naivety, wasted potential, foolishness", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-1", "number": 1, "name": "The Magician", "upright": "Willpower, desire, being resourceful, power, inspired action", "reversed": "Manipulation, poor planning, untapped talents, self-doubt", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-2", "number": 2, "name": "The High Priestess", "upright": "Intuition, sacred knowledge, divine feminine, subconscious", "reversed": "Repressed intuition, hidden agendas, need to listen to inner voice, you know the answer but you refuse to accept it", "yn_upright": "70% Yes/30% No", "yn_reversed": "70% No/30% Yes" },
+            { "id": "major-3", "number": 3, "name": "The Empress", "upright": "Nurturing, beauty, abundance, nature, sensuality", "reversed": "Self-criticism, neglect, barrenness, vanity", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-4", "number": 4, "name": "The Emperor", "upright": "Authority, structure, control, father figure, leadership", "reversed": "Tyranny, rigidity, coldness, weakness", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-5", "number": 5, "name": "The Hierophant", "upright": "Tradition, conformity, morality, ethics, virtue", "reversed": "Rebellion, subversion, unorthodoxy", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-6", "number": 6, "name": "The Lovers", "upright": "Relationships, choices, alignment, values, connection", "reversed": "Separation, misalignment, imbalance, conflict", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-7", "number": 7, "name": "The Chariot", "upright": "Control, willpower, determination, self-discipline, confidence", "reversed": "Self-doubt, lack of direction, cowardice, aggression", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-8", "number": 8, "name": "Strength", "upright": "Strength, courage, patience, control, compassion", "reversed": "Insecurity, self-doubt, low energy, inadequacy", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-9", "number": 9, "name": "The Hermit", "upright": "Introspection, inner guidance, solitude, soul searching", "reversed": "Isolation, loneliness, withdrawal, lost, stucked within yourself", "yn_upright": "Yes with caution/Delayed Yes", "yn_reversed": "No" },
+            { "id": "major-10", "number": 10, "name": "Wheel of Fortune", "upright": "Luck, cycles, destiny, turning point, karma", "reversed": "Bad luck, resistance to change, breaking cycles", "yn_upright": "Yes", "yn_reversed": "Not yet" },
+            { "id": "major-11", "number": 11, "name": "Justice", "upright": "Justice, fairness, truth, cause and effect, accountability", "reversed": "Injustice, corruption, bias, unaccountability", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-12", "number": 12, "name": "The Hanged Man", "upright": "Perspective, restriction, sacrifice, pause, suspension", "reversed": "Its time to move on, stop punishing yourself, release", "yn_upright": "You have to think twice about it, ask again later", "yn_reversed": "You have to think twice about it, ask again later" },
+            { "id": "major-13", "number": 13, "name": "Death", "upright": "New beginnings, transition, evolution, change", "reversed": "Resistance to change, stubbornness, inner transformation", "yn_upright": "Yes, with change", "yn_reversed": "No, change needed" },
+            { "id": "major-14", "number": 14, "name": "Temperance", "upright": "Balance, moderation, peace, patience, harmony", "reversed": "Imbalance, excess, lack of harmony, impatience", "yn_upright": "Yes, to move on towards balance", "yn_reversed": "No, you are getting out of balance, slow down and find your center" },
+            { "id": "major-15", "number": 15, "name": "The Devil", "upright": "Greed, restriction, detachment, sexuality, materialism", "reversed": "Release, freedom, reclamation, breaking free", "yn_upright": "No", "yn_reversed": "Yes" },
+            { "id": "major-16", "number": 16, "name": "The Tower", "upright": "Fresh start after chaos, sudden change, upheaval, revelation, breakthrough", "reversed": "Averted disaster, fear of change, delayed collapse, feeling trapped", "yn_upright": "No", "yn_reversed": "Yes" },
+            { "id": "major-17", "number": 17, "name": "The Star", "upright": "Hope, faith, purpose, renewal, spirituality", "reversed": "Despair, lack of faith, lack of direction, unmet goals", "yn_upright": "Yes, there's hope but you need time and effort to get there", "yn_reversed": "No" },
+            { "id": "major-18", "number": 18, "name": "The Moon", "upright": "Intuition, uncertainty, illusion, fear, subconscious", "reversed": "Clarity, understanding, truth, inner work", "yn_upright": "No with caution, things are not what they seem", "yn_reversed": "No with caution, your first step may be right but you need to be careful and do your research before taking the next step" },
+            { "id": "major-19", "number": 19, "name": "The Sun", "upright": "Positivity, success, vitality, joy, clarity", "reversed": "Sadness, negativity, missed opportunities, lack of clarity", "yn_upright": "Yes", "yn_reversed": "No" },
+            { "id": "major-20", "number": 20, "name": "Judgement", "upright": "Awakening, renewal, forgiveness, reflection, inner calling", "reversed": "Lack of self-awareness, repeated mistakes, doubt, refusal", "yn_upright": "Yes, believe in yourself and move on", "yn_reversed": "Probabily No, take your time" },
+            { "id": "major-21", "number": 21, "name": "The World", "upright": "Completion, accomplishment, wholeness, fulfillment, travel", "reversed": "Incompleteness, shortsightedness, disappointment, lack of closure", "yn_upright": "Yes", "yn_reversed": "Not yet, you need to finish something first" }
+          ],
+          "minorArcana": {
+            "wands": [
+              { "id": "wands-0", "rank": "Ace", "name": "Ace of Wands", "upright": "Inspiration, new opportunities, growth, potential, creativity, fresh start", "reversed": "Lack of direction, lack of passion, waste of potential, delays, false starts, creative block", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-1", "rank": "Two", "name": "Two of Wands", "upright": "Planning, making decisions, leaving home, wander", "reversed": "Uncertainty, lack of plan, lack of direction, you should step back and start over, you are not ready yet", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-2", "rank": "Three", "name": "Three of Wands", "upright": "Looking ahead, expansion, foresight, overseas opportunities, freedom", "reversed": "Lack of foresight, delays, missed opportunities, returning home", "yn_upright": "Yes", "yn_reversed": "Probably No, you might have to look for other directions" },
+              { "id": "wands-3", "rank": "Four", "name": "Four of Wands", "upright": "Celebration, reunion, harmony, home, happiness", "reversed": "Conflict, breakup, separation, cancelled plans, self doubt", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-4", "rank": "Five", "name": "Five of Wands", "upright": "Conflict, competition, tension, diversity", "reversed": "Harmony, agreement, coming together, conflict resolution", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "wands-5", "rank": "Six", "name": "Six of Wands", "upright": "Success, victory, public recognition, healthy pride", "reversed": "Ego, pride, disrepute, a fall from grace", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-6", "rank": "Seven", "name": "Seven of Wands", "upright": "Perseverance, defending, challenging, maintaining control", "reversed": "Giving up, lack of defense, wavering", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-7", "rank": "Eight", "name": "Eight of Wands", "upright": "Movement, speed, progress, fast change, travel, achievement", "reversed": "Delays, frustration, argument, stagnation", "yn_upright": "Yes", "yn_reversed": "No with warning" },
+              { "id": "wands-8", "rank": "Nine", "name": "Nine of Wands", "upright": "Resilience, persistence, boundaries, fatigue", "reversed": "Exhaustion, defensiveness, stubborness", "yn_upright": "Yes, it is time to let go", "yn_reversed": "No" },
+              { "id": "wands-9", "rank": "Ten", "name": "Ten of Wands", "upright": "Burden, overwhelm, responsibility, hard work, stress", "reversed": "Releasing burden, lack of responsibility, irresponsibility", "yn_upright": "No", "yn_reversed": "Yes, you have done your part, now it's time to let go and move on" },
+              { "id": "wands-10", "rank": "Page", "name": "Page of Wands", "upright": "Exploration, excitement, freedom, innocence, discovery", "reversed": "Lack of direction, naivety, lack of imagination, restlessness", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-11", "rank": "Knight", "name": "Knight of Wands", "upright": "Adventure, passion, energy, impulsiveness", "reversed": "Arrogance, recklessness, jealousy, impatience", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-12", "rank": "Queen", "name": "Queen of Wands", "upright": "Confidence, independence, determination, charisma", "reversed": "Self-doubt, lack of direction, inferiority, jealousy", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "wands-13", "rank": "King", "name": "King of Wands", "upright": "Leadership, vision, entrepreneurship, boldness", "reversed": "Tyranny, recklessness, lack of foresight", "yn_upright": "Yes", "yn_reversed": "No" }
+            ],
+            "cups": [
+              { "id": "cups-0", "rank": "Ace", "name": "Ace of Cups", "upright": "New feelings, compassion, creativity, intuition, spiritual awakening, fresh start", "reversed": "Emotional loss, blocked creativity, lack of flow, relationship issues", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-1", "rank": "Two", "name": "Two of Cups", "upright": "Partnership, mutual attraction, closeness, equality, connection", "reversed": "Imbalance, tension in relationships, misunderstanding, discord", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-2", "rank": "Three", "name": "Three of Cups", "upright": "Celebration, friendship, creativity, community", "reversed": "Isolation, loneliness, scattered efforts", "yn_upright": "Yes with caution", "yn_reversed": "No, you should watch out someone around you" },
+              { "id": "cups-3", "rank": "Four", "name": "Four of Cups", "upright": "Apathy, lack of awareness, illusion, daydreaming", "reversed": "Acceptance, allowance, new perspective", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "cups-4", "rank": "Five", "name": "Five of Cups", "upright": "Loss, grief, sorrow, bereavement, disappointment", "reversed": "Acceptance, moving on, forgiveness, reunion", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "cups-5", "rank": "Six", "name": "Six of Cups", "upright": "Nostalgia, simplicity, childhood, familiarity, back to home", "reversed": "Longing, distance, letting go, future, leaving home, stuck in the past", "yn_upright": "Yes", "yn_reversed": "No with caution, you are too stucked in the past, it's time to let go and move on but you should be careful about it, you may have to do some inner work before you can move on" },
+              { "id": "cups-6", "rank": "Seven", "name": "Seven of Cups", "upright": "Daydreaming, choice, wishful thinking, illusion, madness", "reversed": "Clarity, disillusionment, awakening, harsh truth", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "cups-7", "rank": "Eight", "name": "Eight of Cups", "upright": "Moving on, letting go, abandonment, escapism", "reversed": "Inability to move on, fear of leaving, emotional dependency", "yn_upright": "No, you should let go", "yn_reversed": "Yes" },
+              { "id": "cups-8", "rank": "Nine", "name": "Nine of Cups", "upright": "Happiness, contentment, satisfaction, gratitude", "reversed": "Dissatisfaction, lack of fulfillment, arrogance, greed", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-9", "rank": "Ten", "name": "Ten of Cups", "upright": "Harmony, family, relationships, community, belonging", "reversed": "Conflict, discord, family crisis, disruption", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-10", "rank": "Page", "name": "Page of Cups", "upright": "Curiosity, invitation, imagination, youthfulness, naivety, romance", "reversed": "Closed off, unimaginative, apathetic, childishness", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-11", "rank": "Knight", "name": "Knight of Cups", "upright": "Idealism, charm, grace, imagination, boyishness", "reversed": "Heartbreak, moodiness, volatility, immaturity", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-12", "rank": "Queen", "name": "Queen of Cups", "upright": "Compassion, calm, nurturing, sensitivity, intuition", "reversed": "Emotional insecurity, inner turmoil, insecurity", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "cups-13", "rank": "King", "name": "King of Cups", "upright": "Emotional balance, intuition, diplomacy, responsibility", "reversed": "Emotional manipulation, volatility, moodiness", "yn_upright": "Yes", "yn_reversed": "No" }
+            ],
+            "swords": [
+              { "id": "swords-0", "rank": "Ace", "name": "Ace of Swords", "upright": "Clarity, breakthroughs, new ideas, communication, truth, fresh start", "reversed": "Confusion, dishonesty, blocked communication, misunderstanding", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-1", "rank": "Two", "name": "Two of Swords", "upright": "Difficult choices, indecision, stalemate, tension", "reversed": "Indecision, clarity, breakthrough, acceptance", "yn_upright": "No", "yn_reversed": "No" },
+              { "id": "swords-2", "rank": "Three", "name": "Three of Swords", "upright": "Heartbreak, sorrowful, grief, pain, difficult times, betrayal", "reversed": "Healing, forgiveness, moving on, recovery, seeking support", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "swords-3", "rank": "Four", "name": "Four of Swords", "upright": "Rest, respite, meditation, contemplation, recuperation", "reversed": "Restlessness, agitation, anxiety, insomnia, burnout", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-4", "rank": "Five", "name": "Five of Swords", "upright": "Conflict, loss, betrayal, regret, defeat, violence", "reversed": "Reconciliation, resolution, inner peace, acceptance", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "swords-5", "rank": "Six", "name": "Six of Swords", "upright": "Transition, travel, departure, moving on, progress", "reversed": "Resistance, being trapped, inability to move on, canceled travel", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-6", "rank": "Seven", "name": "Seven of Swords", "upright": "Deception, betrayal, cunning, dishonesty, sneakiness", "reversed": "Coming clean, honesty, sincerity, seeking truth", "yn_upright": "No with caution, there may be hidden agendas, be careful", "yn_reversed": "Yes with caution, possible dishonesty and deceptions" },
+              { "id": "swords-7", "rank": "Eight", "name": "Eight of Swords", "upright": "Restriction, confusion, powerlessness, victim mentality", "reversed": "Freedom, release, breaking free, empowerment", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "swords-8", "rank": "Nine", "name": "Nine of Swords", "upright": "Anxiety, worry, nightmares, stress, fear", "reversed": "Anxiety relief, hope, freedom from worry", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "swords-9", "rank": "Ten", "name": "Ten of Swords", "upright": "Endings, loss, defeat, victimhood, betrayal", "reversed": "Recovery, acceptance, ending, new start", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "swords-10", "rank": "Page", "name": "Page of Swords", "upright": "Curiosity, new ideas, curiosity, communication, youthfulness", "reversed": "Impulsiveness, thoughtlessness, hurtful communication", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-11", "rank": "Knight", "name": "Knight of Swords", "upright": "Intellectual, communication, logic, truth-seeking", "reversed": "Aggressive, deceptive, manipulative, argumentative", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-12", "rank": "Queen", "name": "Queen of Swords", "upright": "Intellect, independence, logic, perception, grace, protection", "reversed": "Cold, bitter, manipulative, harsh, judgmental", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "swords-13", "rank": "King", "name": "King of Swords", "upright": "Intellectual, authority, truth, logic, analytical, wisdom", "reversed": "Cruel, aggressive, harsh, cold", "yn_upright": "Yes", "yn_reversed": "No" }
+            ],
+            "pentacles": [
+              { "id": "pentacles-0", "rank": "Ace", "name": "Ace of Pentacles", "upright": "New opportunity, prosperity, abundance, good fortune, fresh start", "reversed": "Lost opportunity, lack of resources, scarcity, over spending, financial disarray", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-1", "rank": "Two", "name": "Two of Pentacles", "upright": "Balance, adaptability, time management, prioritization", "reversed": "Imbalance, lack of adaptability, disorganization", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-2", "rank": "Three", "name": "Three of Pentacles", "upright": "Teamwork, collaboration, learning, building, craftsmanship", "reversed": "Lack of collaboration, lack of teamwork, disharmony", "yn_upright": "Yes", "yn_reversed": "No, you should watch out someone around you" },
+              { "id": "pentacles-3", "rank": "Four", "name": "Four of Pentacles", "upright": "Conservation, control, possessiveness, materialism, stinginess", "reversed": "Letting go, sharing, generosity, release, gambling, risk-taking", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "pentacles-4", "rank": "Five", "name": "Five of Pentacles", "upright": "Financial hardship, poverty, lack of support, abandonment, unemployment", "reversed": "Recovery, assistance, abundance, acceptance, paid debts", "yn_upright": "No", "yn_reversed": "Yes" },
+              { "id": "pentacles-5", "rank": "Six", "name": "Six of Pentacles", "upright": "Generosity, rewards, charity, sharing, fairness, gratitude", "reversed": "Stinginess, lack of generosity, inequality, abuse of power, greed", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-6", "rank": "Seven", "name": "Seven of Pentacles", "upright": "Perseverance, rewarded investment, paid hard work, growth, patience", "reversed": "Shortsightedness, lack of growth, lack of investment, limited results", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-7", "rank": "Eight", "name": "Eight of Pentacles", "upright": "Skill, craftmanship, expertise, apprenticeship, attention to detail, your work will pay off", "reversed": "Lack of skill, lack of focus, inefficiency", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-8", "rank": "Nine", "name": "Nine of Pentacles", "upright": "Abundance, prosperity, luxury, independence, confidence", "reversed": "Loss of freedom, lack of independence, insecurity, scam, false success", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-9", "rank": "Ten", "name": "Ten of Pentacles", "upright": "Wealth, family, inheritance, legacy, abundance, financial stability", "reversed": "Loss, lack of closure, family conflict", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-10", "rank": "Page", "name": "Page of Pentacles", "upright": "Ambition, desire to learn, reading, scholarship, aptitude, manifestation, new job, new opportunity", "reversed": "Lack of direction, lack of motivation, impatience, immaturity, procrastination", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-11", "rank": "Knight", "name": "Knight of Pentacles", "upright": "Reliability, hard work, tradition, responsibility, loyalty, efficiency", "reversed": "Unreliability, lack of growth, procrastination, irresponsibility, laziness", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-12", "rank": "Queen", "name": "Queen of Pentacles", "upright": "Practicality, creature comforts, nurturing, independence", "reversed": "Lack of nurturing, lack of independence, insecurity, manipulation", "yn_upright": "Yes", "yn_reversed": "No" },
+              { "id": "pentacles-13", "rank": "King", "name": "King of Pentacles", "upright": "Abundance, prosperity, security, leadership, authority", "reversed": "Lack of abundance, lack of security, unworthiness, corruption, greed", "yn_upright": "Yes", "yn_reversed": "No" }
+            ]
+          }
+        };
 
-        // Roman Numerals helper
+        let fullDeck = [];
+
         function toRoman(num) {
             const romans = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
             return romans[num];
         }
 
-        // Generate Deck
-        let fullDeck = [];
-        
-        // Add Major Arcana
-        majorArcana.forEach((name, index) => {
-            fullDeck.push({
-                id: `major-${index}`,
-                name: name,
+        function loadCards() {
+            const majorArcana = tarotData.majorArcana.map(card => ({
+                ...card,
                 type: 'Major',
+                roman: toRoman(card.number),
                 suit: 'Major',
-                number: index,
-                roman: index === 0 ? '0' : toRoman(index),
-                icon: 'crown' // Default icon for Major
-            });
+                number: card.number
+            }));
+
+            const minorArcana = [
+                ...tarotData.minorArcana.wands.map(card => ({ ...card, type: 'Minor', suit: 'Wands', number: card.rank })),
+                ...tarotData.minorArcana.cups.map(card => ({ ...card, type: 'Minor', suit: 'Cups', number: card.rank })),
+                ...tarotData.minorArcana.swords.map(card => ({ ...card, type: 'Minor', suit: 'Swords', number: card.rank })),
+                ...tarotData.minorArcana.pentacles.map(card => ({ ...card, type: 'Minor', suit: 'Pentacles', number: card.rank }))
+            ];
+
+            fullDeck = [...majorArcana, ...minorArcana];
+            console.log('Cards loaded from embedded data:', fullDeck.length);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCards();
         });
 
-        // Add Minor Arcana
-        suits.forEach(suit => {
-            ranks.forEach((rank, index) => {
-                let icon = 'circle';
-                if(suit === 'Wands') icon = 'flame';
-                if(suit === 'Cups') icon = 'droplet';
-                if(suit === 'Swords') icon = 'sword';
-                if(suit === 'Pentacles') icon = 'hexagon';
-
-                fullDeck.push({
-                    id: `${suit.toLowerCase()}-${index}`,
-                    name: `${rank} of ${suit}`,
-                    type: 'Minor',
-                    suit: suit,
-                    number: index + 1,
-                    roman: null,
-                    icon: icon
-                });
-            });
-        });
-
-        // Position meanings for spreads
         const spreads = {
             1: [
                 { name: "Daily Insight", desc: "The energy surrounding you today." }
@@ -243,19 +328,26 @@
                 { name: "The Past", desc: "Influences from the past that still affect the situation." },
                 { name: "The Present", desc: "The current state of affairs and immediate challenges." },
                 { name: "The Future", desc: "The likely outcome if the current path is followed." }
+            ],
+            10: [
+                { name: "The Present", desc: "The heart of the matter." },
+                { name: "The Challenge", desc: "The obstacle crossing you (Upright or Reversed)." },
+                { name: "The Foundation", desc: "Subconscious influences or the root of the issue." },
+                { name: "The Past", desc: "Recent events that are passing away." },
+                { name: "The Crown", desc: "Your conscious goals and best potential outcome." },
+                { name: "The Future", desc: "Immediate future events." },
+                { name: "Self", desc: "Your attitude and stance towards the issue." },
+                { name: "Environment", desc: "How others see you or external influences." },
+                { name: "Hopes & Fears", desc: "Inner psychological state regarding the outcome." },
+                { name: "Outcome", desc: "The culmination of the reading." }
             ]
         };
 
-        // --- Logic ---
-
         function shuffle(array) {
             let currentIndex = array.length,  randomIndex;
-            // While there remain elements to shuffle.
             while (currentIndex != 0) {
-                // Pick a remaining element.
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-                // And swap it with the current element.
                 [array[currentIndex], array[randomIndex]] = [
                     array[randomIndex], array[currentIndex]];
             }
@@ -263,40 +355,42 @@
         }
 
         async function drawCards() {
+            if (!fullDeck || fullDeck.length === 0) {
+                loadCards();
+            }
+
             const spreadType = parseInt(document.getElementById('spread-select').value);
             const spreadArea = document.getElementById('spread-area');
+            const cardsContainer = document.getElementById('cards-container');
             const loading = document.getElementById('loading');
             const readingArea = document.getElementById('reading-area');
             const readingContent = document.getElementById('reading-content');
 
-            // Reset UI
-            spreadArea.innerHTML = '';
+            cardsContainer.innerHTML = '';
             readingArea.classList.add('hidden');
             readingContent.innerHTML = '';
             loading.classList.remove('hidden');
 
-            // Simulate Shuffle Delay
             await new Promise(r => setTimeout(r, 600));
             loading.classList.add('hidden');
 
-            // Logic
-            let deck = shuffle([...fullDeck]); // Copy and shuffle
+            let deck = shuffle([...fullDeck]);
             let drawn = [];
 
-            // Container Class based on spread
-            spreadArea.className = 'spread-container fade-in';
+            if (spreadType === 10) {
+                spreadArea.className = 'celtic-cross-grid fade-in';
+            } else {
+                spreadArea.className = 'spread-container fade-in';
+            }
 
-            // Draw Cards
             for(let i=0; i<spreadType; i++) {
                 let card = deck.pop();
-                let isReversed = Math.random() < 0.5; // 50% chance
+                let isReversed = Math.random() < 0.5;
                 drawn.push({ ...card, isReversed, positionName: spreads[spreadType][i].name, positionDesc: spreads[spreadType][i].desc });
-                
-                // Render Card HTML
-                const cardEl = createCardElement(card, isReversed, i, spreadType, spreads[spreadType][i].name);
-                spreadArea.appendChild(cardEl);
 
-                // Add to Reading section
+                const cardEl = createCardElement(card, isReversed, i, spreadType, spreads[spreadType][i].name);
+                cardsContainer.appendChild(cardEl);
+
                 const readingItem = document.createElement('div');
                 readingItem.className = 'bg-slate-800 p-4 rounded border border-slate-700 hover:border-amber-500 transition-colors';
                 readingItem.innerHTML = `
@@ -311,25 +405,26 @@
                     <p class="text-sm text-slate-300">
                         ${getCardMeaning(card, isReversed)}
                     </p>
+                    <p class="text-xs font-bold text-amber-400 mt-1">
+                        Yes or No: ${isReversed ? (card.yn_reversed || 'N/A') : (card.yn_upright || 'N/A')}
+                    </p>
                 `;
                 readingContent.appendChild(readingItem);
             }
-            
-            readingArea.classList.remove('hidden');
-            
-            // Re-initialize icons for new elements
-            lucide.createIcons();
 
-            // Auto scroll to cards
+            readingArea.classList.remove('hidden');
+            lucide.createIcons();
             spreadArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function createCardElement(card, isReversed, index, spreadType, positionLabel) {
             const wrapper = document.createElement('div');
-            
+            if (spreadType === 10) {
+                wrapper.classList.add(`pos-${index+1}`);
+            }
+
             wrapper.className += ` tarot-card group relative`;
-            
-            // Tooltip Label for position (visible on hover or desktop)
+
             const label = document.createElement('div');
             label.className = "absolute -top-8 left-0 right-0 text-center text-xs text-amber-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none";
             label.innerText = `${index+1}. ${positionLabel}`;
@@ -337,111 +432,64 @@
 
             const inner = document.createElement('div');
             inner.className = 'card-inner';
-            
-            // Back of card
+
             const back = document.createElement('div');
             back.className = 'card-face card-back';
             back.innerHTML = `<div class="w-12 h-12 border-2 border-amber-400/30 rounded-full flex items-center justify-center"><div class="w-8 h-8 border border-amber-400/50 rotate-45"></div></div>`;
 
-            // Front of card
             const front = document.createElement('div');
             let suitClass = card.suit.toLowerCase();
             if(card.type === 'Major') suitClass = 'major';
-            
+
             front.className = `card-face card-front ${suitClass}`;
-            
-            // Inner content wrapper for reversal rotation
+
             const content = document.createElement('div');
             content.className = `card-content flex flex-col items-center justify-between h-full w-full py-2 ${isReversed ? 'reversed' : ''}`;
-            
-            // Card Top Number
+
             const topNum = document.createElement('div');
             topNum.className = "text-sm font-bold opacity-70";
             topNum.innerText = card.roman ? card.roman : card.number;
 
-            // Card Icon
             const iconDiv = document.createElement('div');
             iconDiv.innerHTML = `<i data-lucide="${getIconName(card.suit)}" class="w-12 h-12 stroke-[1.5]"></i>`;
             if (card.type === 'Major') iconDiv.innerHTML = `<i data-lucide="crown" class="w-12 h-12 stroke-[1.5] text-purple-600"></i>`;
 
-            // Card Name
             const nameDiv = document.createElement('div');
             nameDiv.className = "tarot-font text-center font-bold text-sm leading-tight";
             nameDiv.innerText = card.name;
 
-            // Assemble
             content.appendChild(topNum);
             content.appendChild(iconDiv);
             content.appendChild(nameDiv);
-            
+
             front.appendChild(content);
             inner.appendChild(back);
             inner.appendChild(front);
             wrapper.appendChild(inner);
 
-            // Flip Animation
             setTimeout(() => {
                 inner.classList.add('is-flipped');
-            }, 100 + (index * 200)); // Staggered flip
+            }, 100 + (index * 200));
 
             return wrapper;
         }
 
         function getIconName(suit) {
-            switch(suit) {
+            const normalizedSuit = suit ? suit.charAt(0).toUpperCase() + suit.slice(1).toLowerCase() : '';
+            switch(normalizedSuit) {
                 case 'Wands': return 'flame';
-                case 'Cups': return 'glass-water'; // approximation
+                case 'Cups': return 'glass-water';
                 case 'Swords': return 'sword';
                 case 'Pentacles': return 'circle-dashed';
                 default: return 'star';
             }
         }
 
-        // Simple Keyword generator since we don't have a DB
         function getCardMeaning(card, isReversed) {
-            const keywords = {
-                'Major': {
-                    'The Fool': ['New beginnings, innocence, spontaneity', 'Recklessness, risk-taking, naivety'],
-                    'The Magician': ['Manifestation, resourcefulness, power', 'Manipulation, poor planning, untapped talents'],
-                    'The High Priestess': ['Intuition, unconscious, inner voice', 'Hidden agendas, disconnected from intuition'],
-                    'The Empress': ['Femininity, beauty, nature, nurturing', 'Creative block, dependence on others'],
-                    'The Emperor': ['Authority, establishment, structure', 'Domination, excessive control, lack of discipline'],
-                    'The Hierophant': ['Spiritual wisdom, religious beliefs, tradition', 'Personal beliefs, freedom, challenging status quo'],
-                    'The Lovers': ['Love, harmony, relationships, choices', 'Self-love, disharmony, imbalance, misalignment'],
-                    'The Chariot': ['Control, willpower, success, action', 'Self-discipline, opposition, lack of direction'],
-                    'Strength': ['Courage, persuasion, influence, compassion', 'Inner strength, self-doubt, low energy, raw emotion'],
-                    'The Hermit': ['Soul-searching, introspection, being alone', 'Isolation, loneliness, withdrawal'],
-                    'Wheel of Fortune': ['Good luck, karma, life cycles, destiny', 'Bad luck, resistance to change, breaking cycles'],
-                    'Justice': ['Justice, fairness, truth, cause and effect', 'Unfairness, lack of accountability, dishonesty'],
-                    'The Hanged Man': ['Pause, surrender, letting go, new perspectives', 'Delays, resistance, stalling, indecision'],
-                    'Death': ['Endings, change, transformation, transition', 'Resistance to change, personal transformation'],
-                    'Temperance': ['Balance, moderation, patience, purpose', 'Imbalance, excess, self-healing, realignment'],
-                    'The Devil': ['Shadow self, attachment, addiction, restriction', 'Releasing limiting beliefs, exploring dark thoughts'],
-                    'The Tower': ['Sudden change, upheaval, chaos, revelation', 'Personal transformation, fear of change, averting disaster'],
-                    'The Star': ['Hope, faith, purpose, renewal, spirituality', 'Lack of faith, despair, self-trust, disconnection'],
-                    'The Moon': ['Illusion, fear, anxiety, subconscious, intuition', 'Release of fear, repressed emotion, inner confusion'],
-                    'The Sun': ['Positivity, fun, warmth, success, vitality', 'Inner child, feeling down, overly optimistic'],
-                    'Judgement': ['Judgement, rebirth, inner calling, absolution', 'Self-doubt, inner critic, ignoring the call'],
-                    'The World': ['Completion, integration, accomplishment, travel', 'Seeking personal closure, short-cuts, delays']
-                },
-                'Wands': ['Creativity, action, and passion.', 'Delays, lack of direction, or burnout.'],
-                'Cups': ['Emotions, relationships, and feelings.', 'Emotional loss, blocked creativity, or emptiness.'],
-                'Swords': ['Intellect, thoughts, and challenges.', 'Confusion, mental fog, or brutal honesty.'],
-                'Pentacles': ['Material wealth, career, and manifestation.', 'Financial loss, greed, or lack of planning.']
-            };
-
-            if (card.type === 'Major') {
-                const meanings = keywords.Major[card.name];
-                return isReversed ? meanings[1] : meanings[0];
-            } else {
-                // Generative generic meanings for minors to save space in this demo
-                // Ideally this would be a full database
-                const base = keywords[card.suit];
-                return isReversed ? `(Reversed) Blocked energy regarding ${base[1]}` : `Upright energy focused on ${base[0]}`;
-            }
+            if (!card) return '';
+            return isReversed ? card.reversed : card.upright;
         }
 
-        // Init icons
         lucide.createIcons();
     </script>
 </body>

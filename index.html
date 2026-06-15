@@ -118,11 +118,12 @@
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         }
 
-        @media (min-width: 1024px) {
+       @media (min-width: 1024px) {
             .celtic-cross-grid {
                 grid-template-columns: repeat(6, 1fr);
-                grid-template-rows: repeat(4, 1fr);
-                height: 700px;
+                grid-template-rows: repeat(6, 1fr);
+                height: auto;
+                min-height: 700px;
             }
             .pos-1 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 1; }
             .pos-2 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 2; transform: rotate(90deg) !important; opacity: 0.9; }
@@ -130,10 +131,10 @@
             .pos-4 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; padding-right: 10px;}
             .pos-5 { grid-column: 2 / 4; grid-row: 1 / 2; justify-self: center; }
             .pos-6 { grid-column: 4 / 5; grid-row: 2 / 3; justify-self: start; padding-left: 10px;}
-            .pos-7 { grid-column: 6; grid-row: 4; }
-            .pos-8 { grid-column: 6; grid-row: 3; }
-            .pos-9 { grid-column: 6; grid-row: 2; }
-            .pos-10 { grid-column: 6; grid-row: 1; }
+            .pos-7 { grid-column: 2; grid-row: 5; }
+            .pos-8 { grid-column: 3; grid-row: 5; }
+            .pos-9 { grid-column: 4; grid-row: 5; }
+            .pos-10 { grid-column: 5; grid-row: 5; }
         }
 
         @keyframes fadeIn {

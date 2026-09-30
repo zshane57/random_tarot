@@ -4,200 +4,802 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Tarot Fortune Teller - Mystic Arcane</title>
+    <meta name="theme-color" content="#06080f">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1085267415757752" crossorigin="anonymous"></script>
     <style>
         :root {
-            --card-width: 140px;
-            --card-height: 220px;
-            --card-width-sm: 100px;
-            --card-height-sm: 160px;
+            --card-w: 150px;
+            --card-h: 250px;
+            --card-w-sm: 104px;
+            --card-h-sm: 174px;
+
+            --bg: #06080f;
+            --bg-2: #0d1226;
+            --gold: #d4af37;
+            --gold-light: #f3dc8a;
+            --gold-dark: #9c7a1c;
+            --parchment: #f5ead3;
+            --parchment-dark: #e6d5b2;
+            --ink: #2b2118;
+            --text: #e8e2d3;
+            --muted: #9a94a8;
+
+            --ink-major: #5b21b6;
+            --ink-wands: #b91c1c;
+            --ink-cups: #1e40af;
+            --ink-swords: #334155;
+            --ink-pentacles: #166534;
         }
 
+        * { -webkit-tap-highlight-color: transparent; }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Lato', sans-serif;
-            background-color: #0f172a;
-            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
-            color: #e2e8f0;
+            font-family: 'Cormorant Garamond', 'Noto Serif SC', Georgia, serif;
+            font-size: 17px;
+            background-color: var(--bg);
+            color: var(--text);
+            position: relative;
+            overflow-x: hidden;
         }
 
         h1, h2, h3, .tarot-font {
             font-family: 'Cinzel', 'Noto Serif SC', serif;
         }
 
-        /* Card Styles */
-        .tarot-card {
-            width: var(--card-width);
-            height: var(--card-height);
-            perspective: 1000px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
+        html[lang="zh-CN"] body { font-family: 'Noto Serif SC', 'Cormorant Garamond', serif; }
+
+        /* ---------- Atmosphere: nebula, stars, vignette ---------- */
+        .sky {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 10%, rgba(88, 60, 160, 0.35), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 85% 25%, rgba(30, 80, 140, 0.30), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 100%, rgba(120, 70, 30, 0.18), transparent 60%),
+                linear-gradient(180deg, #080b18 0%, var(--bg) 60%, #04050b 100%);
+        }
+        .sky::before, .sky::after {
+            content: "";
+            position: absolute;
+            inset: -200px;
+            background-repeat: repeat;
+        }
+        .sky::before {
+            background-image:
+                radial-gradient(1px 1px at 12px 18px, rgba(255,255,255,0.9), transparent 2px),
+                radial-gradient(1px 1px at 75px 42px, rgba(255,255,255,0.6), transparent 2px),
+                radial-gradient(1.5px 1.5px at 140px 95px, rgba(243,220,138,0.9), transparent 2px),
+                radial-gradient(1px 1px at 190px 20px, rgba(255,255,255,0.5), transparent 2px),
+                radial-gradient(1px 1px at 55px 150px, rgba(255,255,255,0.7), transparent 2px),
+                radial-gradient(1px 1px at 110px 180px, rgba(255,255,255,0.4), transparent 2px),
+                radial-gradient(1.5px 1.5px at 170px 140px, rgba(255,255,255,0.8), transparent 2px);
+            background-size: 220px 220px;
+            animation: drift 180s linear infinite, twinkle 6s ease-in-out infinite alternate;
+        }
+        .sky::after {
+            background-image:
+                radial-gradient(1px 1px at 30px 60px, rgba(255,255,255,0.5), transparent 2px),
+                radial-gradient(1px 1px at 120px 20px, rgba(243,220,138,0.6), transparent 2px),
+                radial-gradient(1px 1px at 240px 130px, rgba(255,255,255,0.4), transparent 2px),
+                radial-gradient(1px 1px at 300px 220px, rgba(255,255,255,0.6), transparent 2px),
+                radial-gradient(1px 1px at 80px 260px, rgba(255,255,255,0.3), transparent 2px);
+            background-size: 340px 340px;
+            animation: drift 300s linear infinite reverse, twinkle 9s ease-in-out infinite alternate-reverse;
+        }
+        .vignette {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 40%, rgba(0,0,0,0.55) 100%);
+        }
+        @keyframes drift {
+            from { transform: translate3d(0, 0, 0); }
+            to   { transform: translate3d(-220px, -220px, 0); }
+        }
+        @keyframes twinkle {
+            from { opacity: 0.55; }
+            to   { opacity: 1; }
         }
 
+        /* ---------- Header ---------- */
+        .title-gold {
+            background: linear-gradient(180deg, #fff2b8 0%, var(--gold-light) 35%, var(--gold) 60%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 12px rgba(212, 175, 55, 0.25));
+        }
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+        .ornament::before, .ornament::after {
+            content: "";
+            height: 1px;
+            width: min(120px, 25vw);
+            background: linear-gradient(90deg, transparent, var(--gold));
+        }
+        .ornament::after { background: linear-gradient(90deg, var(--gold), transparent); }
+
+        /* ---------- Glass panels ---------- */
+        .glass {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .field-input {
+            width: 100%;
+            background: rgba(6, 8, 15, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.05rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .field-input::placeholder { color: rgba(154, 148, 168, 0.7); font-style: italic; }
+        .field-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Spread tiles */
+        .spread-tile {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            transition: transform .2s, border-color .2s, background .2s, box-shadow .2s;
+            color: var(--muted);
+            text-align: center;
+        }
+        .spread-tile:hover { transform: translateY(-2px); border-color: rgba(212,175,55,0.45); color: var(--text); }
+        .spread-tile.active {
+            border-color: var(--gold);
+            background: linear-gradient(180deg, rgba(212,175,55,0.14), rgba(212,175,55,0.04));
+            box-shadow: 0 0 0 1px rgba(212,175,55,0.35), 0 10px 30px -12px rgba(212,175,55,0.5);
+            color: var(--text);
+        }
+        .spread-tile .tile-name { font-family: 'Cinzel', 'Noto Serif SC', serif; font-weight: 600; font-size: 0.85rem; letter-spacing: .04em; }
+        .spread-tile.active .tile-name { color: var(--gold-light); }
+        .spread-tile .tile-desc { font-size: 0.8rem; line-height: 1.2; opacity: .8; }
+        .mini-spread { display: grid; gap: 3px; height: 34px; align-items: center; justify-items: center; }
+        .mini-card { width: 10px; height: 16px; border-radius: 2px; border: 1px solid currentColor; opacity: .55; }
+        .spread-tile.active .mini-card { opacity: 1; border-color: var(--gold); background: rgba(212,175,55,0.25); }
+        .mini-1 { grid-template-columns: 1fr; }
+        .mini-3 { grid-template-columns: repeat(3, auto); }
+        .mini-10 { grid-template-columns: repeat(4, auto); grid-template-rows: repeat(2, auto); gap: 2px; }
+        .mini-10 .mini-card { width: 7px; height: 11px; }
+
+        /* Divinate button */
+        .btn-gold {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #f3dc8a 0%, #d4af37 45%, #b8901f 100%);
+            color: #1a1408;
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 14px 40px;
+            box-shadow: 0 10px 30px -8px rgba(212,175,55,0.6), inset 0 1px 0 rgba(255,255,255,0.5);
+            transition: transform .2s, box-shadow .2s, filter .2s;
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -10px rgba(212,175,55,0.8), inset 0 1px 0 rgba(255,255,255,0.5); filter: saturate(1.1); }
+        .btn-gold:active { transform: translateY(0); }
+        .btn-gold::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            transform: skewX(-20deg);
+            animation: sheen 4s ease-in-out infinite;
+        }
+        @keyframes sheen {
+            0%, 60% { left: -60%; }
+            100% { left: 140%; }
+        }
+        .btn-ghost {
+            border: 1px solid rgba(212,175,55,0.35);
+            color: var(--gold-light);
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            letter-spacing: .05em;
+            transition: background .2s, border-color .2s, transform .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-ghost:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); transform: translateY(-1px); }
+        #lang-toggle {
+            z-index: 20;
+            min-height: 40px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            background: rgba(6, 8, 15, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        @media (max-width: 640px) {
+            .ornament::before, .ornament::after { width: 16vw; }
+        }
+
+        /* ---------- Shuffle loader ---------- */
+        .shuffle {
+            position: relative;
+            width: 90px;
+            height: 130px;
+            margin: 0 auto 16px;
+        }
+        .shuffle .sc {
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            border: 1.5px solid var(--gold);
+            background: linear-gradient(135deg, #1a1650, #2a2470);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            animation: shuffle 1.2s ease-in-out infinite;
+        }
+        .shuffle .sc:nth-child(2) { animation-delay: .2s; }
+        .shuffle .sc:nth-child(3) { animation-delay: .4s; }
+        @keyframes shuffle {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            30%  { transform: translate(-40px, -10px) rotate(-12deg); }
+            60%  { transform: translate(40px, -6px) rotate(10deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* ---------- Cards ---------- */
+        .tarot-card {
+            width: var(--card-w);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .card-stage {
+            width: var(--card-w);
+            height: var(--card-h);
+            perspective: 1200px;
+        }
         @media (max-width: 768px) {
-            .tarot-card {
-                width: var(--card-width-sm);
-                height: var(--card-height-sm);
-            }
+            .tarot-card, .card-stage { width: var(--card-w-sm); }
+            .card-stage { height: var(--card-h-sm); }
         }
 
         .card-inner {
             position: relative;
             width: 100%;
             height: 100%;
-            text-align: center;
-            transition: transform 0.8s;
+            transition: transform 0.9s cubic-bezier(.2,.8,.2,1), box-shadow .3s, filter .3s;
             transform-style: preserve-3d;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 30px -10px rgba(0,0,0,0.8);
         }
-
-        .card-inner.is-flipped {
-            transform: rotateY(180deg);
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+        .tarot-card:hover .card-inner.is-flipped {
+            transform: rotateY(180deg) translateY(-10px) scale(1.03);
+            box-shadow: 0 24px 50px -14px rgba(0,0,0,0.85), 0 0 30px rgba(212,175,55,0.25);
         }
-
-        .card-content.reversed {
-            transform: rotate(180deg);
-        }
+        .tarot-card.highlight .card-inner { box-shadow: 0 0 0 3px var(--gold), 0 0 40px rgba(212,175,55,0.5); }
 
         .card-face {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #fbbf24;
-        }
-
-        .card-back {
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fbbf24' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .card-front {
-            background: #f1f5f9;
-            color: #1e293b;
-            transform: rotateY(180deg);
-            padding: 10px;
             overflow: hidden;
         }
 
-        .card-front.major { border-color: #a855f7; background: #faf5ff; }
-        .card-front.wands { border-color: #ef4444; background: #fef2f2; }
-        .card-front.cups { border-color: #3b82f6; background: #eff6ff; }
-        .card-front.swords { border-color: #eab308; background: #fefce8; }
-        .card-front.pentacles { border-color: #22c55e; background: #f0fdf4; }
+        /* Card back */
+        .card-back {
+            background:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg fill='none' stroke='%23d4af37' stroke-opacity='0.28' stroke-width='0.8'%3E%3Cpath d='M14 0 L28 14 L14 28 L0 14 Z'/%3E%3Ccircle cx='14' cy='14' r='3'/%3E%3C/g%3E%3C/svg%3E"),
+                linear-gradient(160deg, #1b1650 0%, #2a2170 45%, #141040 100%);
+            border: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-back::before {
+            content: "";
+            position: absolute;
+            inset: 7px;
+            border: 1px solid rgba(212,175,55,0.7);
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 3px rgba(20,16,64,0.9), inset 0 0 0 4px rgba(212,175,55,0.5);
+        }
+        .card-back .emblem {
+            position: relative;
+            width: 60%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(212,175,55,0.22), rgba(212,175,55,0.02) 65%, transparent 70%);
+            border: 1px solid rgba(212,175,55,0.6);
+            color: var(--gold-light);
+        }
+        .card-back .emblem::before {
+            content: "";
+            position: absolute;
+            inset: 10%;
+            border: 1px dashed rgba(212,175,55,0.5);
+            border-radius: 50%;
+        }
+        .card-back .emblem svg { width: 42%; height: 42%; stroke-width: 1.4; }
 
-        /* Spread Layouts */
+        /* Card front (parchment) */
+        .card-front {
+            transform: rotateY(180deg);
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.5), transparent 55%),
+                linear-gradient(160deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+            color: var(--ink);
+            border: 2px solid var(--gold-dark);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-front::before {
+            /* parchment grain */
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .35;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.22 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .card-front::after {
+            /* reveal shimmer */
+            content: "";
+            position: absolute;
+            top: -20%;
+            left: -80%;
+            width: 50%;
+            height: 140%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.65), transparent);
+            transform: skewX(-18deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .is-flipped .card-front::after { animation: reveal-sheen 1.1s ease-out .7s 1; }
+        @keyframes reveal-sheen {
+            0%   { left: -80%; opacity: 0; }
+            15%  { opacity: 1; }
+            100% { left: 140%; opacity: 0; }
+        }
+
+        .card-frame {
+            position: absolute;
+            inset: 6px;
+            border: 1px solid var(--suit-ink, var(--ink));
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        .card-frame::before {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            border: 1px solid var(--suit-ink, var(--ink));
+            opacity: .35;
+            border-radius: 6px;
+        }
+        .card-frame i, .card-frame .corner {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-color: var(--suit-ink, var(--ink));
+            border-style: solid;
+            opacity: .8;
+        }
+        .corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-top-left-radius: 8px; }
+        .corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-top-right-radius: 8px; }
+        .corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-bottom-left-radius: 8px; }
+        .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-bottom-right-radius: 8px; }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            width: 100%;
+            padding: 14px 10px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--suit-ink, var(--ink));
+        }
+        .card-content.reversed { transform: rotate(180deg); }
+
+        .card-num {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: .08em;
+            opacity: .85;
+        }
+        .card-num.corner-tl { position: absolute; top: 10px; left: 12px; }
+        .card-num.corner-br { position: absolute; bottom: 10px; right: 12px; transform: rotate(180deg); }
+
+        .card-sigil {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(212,175,55,0.35), rgba(212,175,55,0.05) 70%);
+            border: 1px solid rgba(156,122,28,0.7);
+            box-shadow: inset 0 0 0 4px var(--parchment), inset 0 0 0 5px rgba(156,122,28,0.5);
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        .card-sigil::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(156,122,28,0.45);
+        }
+        .card-sigil svg { width: 30px; height: 30px; stroke-width: 1.6; }
+        @media (max-width: 768px) {
+            .card-sigil { width: 44px; height: 44px; }
+            .card-sigil svg { width: 20px; height: 20px; }
+            .card-content { padding: 10px 6px 8px; }
+            .card-num { font-size: 0.65rem; }
+            .card-num.corner-tl { top: 7px; left: 8px; }
+            .card-num.corner-br { bottom: 7px; right: 8px; }
+        }
+
+        .card-name {
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+            font-weight: 700;
+            font-size: 0.78rem;
+            line-height: 1.15;
+            text-align: center;
+            letter-spacing: .02em;
+            padding: 0 4px;
+        }
+        .card-suit {
+            font-size: 0.62rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            opacity: .6;
+            margin-top: 3px;
+            font-family: 'Cinzel', serif;
+        }
+        @media (max-width: 768px) {
+            .card-name { font-size: 0.62rem; }
+            .card-suit { font-size: 0.5rem; letter-spacing: .12em; }
+        }
+
+        .card-front.major     { --suit-ink: var(--ink-major); }
+        .card-front.wands     { --suit-ink: var(--ink-wands); }
+        .card-front.cups      { --suit-ink: var(--ink-cups); }
+        .card-front.swords    { --suit-ink: var(--ink-swords); }
+        .card-front.pentacles { --suit-ink: var(--ink-pentacles); }
+
+        /* Caption under card */
+        .card-caption {
+            text-align: center;
+            line-height: 1.2;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity .5s ease .6s, transform .5s ease .6s;
+        }
+        .tarot-card.revealed .card-caption, .tarot-card.instant .card-caption { opacity: 1; transform: none; }
+        .card-caption .pos {
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+            font-size: 0.72rem;
+            letter-spacing: .08em;
+            color: var(--gold-light);
+            text-transform: uppercase;
+        }
+        .card-caption .orient {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 3px;
+            font-size: 0.68rem;
+            padding: 1px 8px;
+            border-radius: 999px;
+            border: 1px solid currentColor;
+            opacity: .85;
+        }
+        .orient.up { color: #86efac; }
+        .orient.rev { color: #fca5a5; }
+        .card-caption .orient svg { width: 10px; height: 10px; }
+
+        /* ---------- Spread layouts ---------- */
         .spread-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            padding: 20px;
-            min-height: 400px;
+            align-items: flex-start;
+            gap: 28px 22px;
+            padding: 24px 8px;
+            min-height: 360px;
+        }
+        @media (max-width: 768px) {
+            .spread-container { gap: 22px 12px; padding: 16px 4px; }
         }
 
-        /* Celtic Cross Grid */
         .celtic-cross-grid {
-            display: grid;
-            gap: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 28px 14px;
+            padding: 24px 8px;
         }
-
-       @media (min-width: 1024px) {
+        @media (min-width: 1024px) {
             .celtic-cross-grid {
-                grid-template-columns: repeat(6, 1fr);
-                grid-template-rows: repeat(6, 1fr);
-                height: auto;
-                min-height: 700px;
+                display: grid;
+                grid-template-columns: repeat(3, var(--card-w)) 60px var(--card-w);
+                grid-template-rows: repeat(4, auto);
+                gap: 26px 22px;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+                padding: 30px 8px;
             }
-            .pos-1 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 1; }
-            .pos-2 { grid-column: 2 / 4; grid-row: 2 / 3; justify-self: center; z-index: 2; transform: rotate(90deg) !important; opacity: 0.9; }
-            .pos-3 { grid-column: 2 / 4; grid-row: 3 / 4; justify-self: center; }
-            .pos-4 { grid-column: 1 / 2; grid-row: 2 / 3; justify-self: end; padding-right: 10px;}
-            .pos-5 { grid-column: 2 / 4; grid-row: 1 / 2; justify-self: center; }
-            .pos-6 { grid-column: 4 / 5; grid-row: 2 / 3; justify-self: start; padding-left: 10px;}
-            .pos-7 { grid-column: 2; grid-row: 5; }
-            .pos-8 { grid-column: 3; grid-row: 5; }
-            .pos-9 { grid-column: 4; grid-row: 5; }
-            .pos-10 { grid-column: 5; grid-row: 5; }
+            .pos-1  { grid-column: 2; grid-row: 2; z-index: 1; align-self: start; }
+            .pos-2  { grid-column: 2; grid-row: 2; z-index: 2; align-self: start; }
+            .pos-2 .card-stage { transform: rotate(90deg); }
+            .pos-2 .card-caption { display: none; }
+            .pos-2 .card-inner { box-shadow: 0 12px 30px -6px rgba(0,0,0,0.9); }
+            .pos-3  { grid-column: 2; grid-row: 3; }
+            .pos-4  { grid-column: 1; grid-row: 2; }
+            .pos-5  { grid-column: 2; grid-row: 1; }
+            .pos-6  { grid-column: 3; grid-row: 2; }
+            .pos-7  { grid-column: 5; grid-row: 4; }
+            .pos-8  { grid-column: 5; grid-row: 3; }
+            .pos-9  { grid-column: 5; grid-row: 2; }
+            .pos-10 { grid-column: 5; grid-row: 1; }
+            .staff-line {
+                grid-column: 4; grid-row: 1 / 5;
+                width: 1px; height: 85%;
+                background: linear-gradient(180deg, transparent, rgba(212,175,55,0.5), transparent);
+                align-self: center;
+            }
         }
+        .staff-line { display: none; }
+        @media (min-width: 1024px) { .celtic-cross-grid .staff-line { display: block; } }
 
+        /* ---------- Verdict ---------- */
+        .verdict {
+            position: relative;
+            border-radius: 16px;
+            padding: 18px 22px;
+            text-align: center;
+            overflow: hidden;
+        }
+        .verdict .headline {
+            font-family: 'Cinzel Decorative', 'Cinzel', 'Noto Serif SC', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: .08em;
+            line-height: 1.1;
+        }
+        .verdict.yes   { background: linear-gradient(180deg, rgba(16,185,129,0.18), rgba(16,185,129,0.04)); border: 1px solid rgba(52,211,153,0.5); }
+        .verdict.no    { background: linear-gradient(180deg, rgba(244,63,94,0.18), rgba(244,63,94,0.04)); border: 1px solid rgba(251,113,133,0.5); }
+        .verdict.maybe { background: linear-gradient(180deg, rgba(245,158,11,0.18), rgba(245,158,11,0.04)); border: 1px solid rgba(251,191,36,0.5); }
+        .verdict.yes .headline   { color: #6ee7b7; }
+        .verdict.no .headline    { color: #fda4af; }
+        .verdict.maybe .headline { color: #fcd34d; }
+        .verdict::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.12), transparent 60%);
+            pointer-events: none;
+        }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            letter-spacing: .04em;
+            border: 1px solid currentColor;
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+        }
+        .chip.yes   { color: #6ee7b7; background: rgba(16,185,129,0.12); }
+        .chip.no    { color: #fda4af; background: rgba(244,63,94,0.12); }
+        .chip.maybe { color: #fcd34d; background: rgba(245,158,11,0.12); }
+        .chip.na    { color: var(--muted); background: rgba(255,255,255,0.05); }
+
+        /* ---------- Reading cards ---------- */
+        .reading-item {
+            position: relative;
+            border-radius: 14px;
+            padding: 18px 20px 18px 24px;
+            border-left: 3px solid var(--suit-ink, var(--gold));
+            transition: transform .25s, border-color .25s, box-shadow .25s;
+        }
+        .reading-item:hover { transform: translateY(-2px); }
+        .reading-item.flash { animation: flash 1.6s ease-out 1; }
+        @keyframes flash {
+            0%   { box-shadow: 0 0 0 2px var(--gold), 0 0 40px rgba(212,175,55,0.6); }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        .reading-item.major     { --suit-ink: #a78bfa; }
+        .reading-item.wands     { --suit-ink: #f87171; }
+        .reading-item.cups      { --suit-ink: #60a5fa; }
+        .reading-item.swords    { --suit-ink: #cbd5e1; }
+        .reading-item.pentacles { --suit-ink: #4ade80; }
+        .reading-num {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            line-height: 1;
+            color: rgba(212,175,55,0.15);
+            font-weight: 700;
+        }
+        .reading-pos {
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+            font-size: 0.72rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+        .reading-card-name {
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .reading-meaning { color: #d6d0c2; line-height: 1.55; font-size: 1.05rem; }
+        .reading-desc { color: var(--muted); font-style: italic; font-size: 0.95rem; }
+
+        /* ---------- Animations ---------- */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+        .fade-in { animation: fadeIn 0.6s ease-out both; }
+        .fade-in-slow { animation: fadeIn 0.8s ease-out .3s both; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
-        .suit-icon {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 8px;
-        }
+        .float { animation: float 5s ease-in-out infinite; }
+
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001s !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001s !important;
+            }
+            .sky::before, .sky::after { animation: none; }
+            .card-caption { opacity: 1; transform: none; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
+    <div class="sky" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
 
-    <header class="w-full p-6 text-center border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50 relative">
-        <button id="lang-toggle" onclick="toggleLang()" class="absolute top-4 right-4 md:top-6 md:right-6 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-600 hover:border-amber-400 text-xs font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1" aria-label="Switch language">
+    <header class="w-full pt-8 pb-6 px-4 text-center relative">
+        <button id="lang-toggle" onclick="toggleLang()" class="btn-ghost absolute top-4 right-4 md:top-6 md:right-6" aria-label="Switch language">
             <i data-lucide="languages" class="w-4 h-4"></i> <span id="lang-toggle-label">中文</span>
         </button>
-        <h1 class="text-4xl text-amber-400 mb-2 font-bold tracking-wider" data-i18n="title">Free Tarot Fortune Teller</h1>
-        <p class="text-slate-400 text-sm" data-i18n="subtitle">Reveal your path through the cards</p>
+        <div class="ornament text-sm mb-3 fade-in"><i data-lucide="moon-star" class="w-5 h-5"></i></div>
+        <h1 class="title-gold text-4xl md:text-5xl font-bold tracking-wider mb-3 fade-in" data-i18n="title">Free Tarot Fortune Teller</h1>
+        <p class="text-lg italic fade-in-slow" style="color: var(--muted)" data-i18n="subtitle">Reveal your path through the cards</p>
     </header>
 
-    <main class="w-full max-w-7xl flex flex-col items-center p-4">
-        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700 w-full max-w-2xl mx-auto">
-            <div class="flex flex-col w-full md:w-auto">
-                <label class="text-xs text-amber-400 uppercase tracking-widest mb-1" data-i18n="spreadType">Spread Type</label>
-                <select id="spread-select" class="bg-slate-900 text-slate-200 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-amber-400 w-full md:w-auto">
-                    <option value="3" data-i18n="spread3">Three Card Spread (Past, Present, Future/3 cards Yes or No)</option>
-                    <option value="10" data-i18n="spread10">Celtic Cross (Comprehensive)</option>
-                    <option value="1" selected data-i18n="spread1">Single Card (Daily Draw/1 card Yes or No)</option>
-                </select>
-            </div>
-            <button onclick="drawCards()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 px-8 rounded shadow-lg transition-all transform hover:scale-105 mt-auto h-[42px] w-full md:w-auto flex items-center justify-center gap-2">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="divinate">Divinate</span>
-            </button>
-        </div>
+    <main class="w-full max-w-7xl flex flex-col items-center px-4 pb-8">
+        <section class="glass rounded-2xl p-5 md:p-7 w-full max-w-3xl mx-auto mb-10 fade-in-slow">
+            <label for="question" class="block text-xs tracking-[.2em] uppercase mb-2" style="color: var(--gold)" data-i18n="questionLabel">Your question (optional)</label>
+            <input id="question" type="text" maxlength="140" class="field-input mb-6" data-i18n-placeholder="questionPlaceholder" placeholder="Will the path I'm on lead somewhere good?" autocomplete="off">
 
-        <div id="spread-area" class="w-full flex justify-center min-h-[500px]">
-            <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8" data-i18n="shuffling">Shuffling the deck...</div>
+            <div class="text-xs tracking-[.2em] uppercase mb-3" style="color: var(--gold)" data-i18n="spreadType">Spread Type</div>
+            <div id="spread-tiles" class="grid grid-cols-3 gap-3 mb-7" role="radiogroup">
+                <button type="button" class="spread-tile" data-spread="1" role="radio" aria-checked="false" onclick="selectSpread(1)">
+                    <div class="mini-spread mini-1"><span class="mini-card"></span></div>
+                    <div class="tile-name" data-i18n="tile1Name">Single Card</div>
+                    <div class="tile-desc" data-i18n="tile1Desc">Daily draw or a quick yes / no</div>
+                </button>
+                <button type="button" class="spread-tile" data-spread="3" role="radio" aria-checked="false" onclick="selectSpread(3)">
+                    <div class="mini-spread mini-3"><span class="mini-card"></span><span class="mini-card"></span><span class="mini-card"></span></div>
+                    <div class="tile-name" data-i18n="tile3Name">Three Card</div>
+                    <div class="tile-desc" data-i18n="tile3Desc">Past · Present · Future</div>
+                </button>
+                <button type="button" class="spread-tile" data-spread="10" role="radio" aria-checked="false" onclick="selectSpread(10)">
+                    <div class="mini-spread mini-10">
+                        <span class="mini-card"></span><span class="mini-card"></span><span class="mini-card"></span><span class="mini-card"></span>
+                        <span class="mini-card"></span><span class="mini-card"></span><span class="mini-card"></span><span class="mini-card"></span>
+                    </div>
+                    <div class="tile-name" data-i18n="tile10Name">Celtic Cross</div>
+                    <div class="tile-desc" data-i18n="tile10Desc">Ten cards, the full picture</div>
+                </button>
+            </div>
+
+            <div class="flex justify-center">
+                <button id="draw-btn" onclick="drawCards()" class="btn-gold flex items-center gap-2 text-sm md:text-base">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="divinate">Divinate</span>
+                </button>
+            </div>
+        </section>
+
+        <div id="spread-area" class="w-full flex justify-center min-h-[380px]">
+            <div id="loading" class="hidden text-center self-center py-10">
+                <div class="shuffle"><div class="sc"></div><div class="sc"></div><div class="sc"></div></div>
+                <p class="tarot-font tracking-[.2em] text-sm uppercase animate-pulse" style="color: var(--gold-light)" data-i18n="shuffling">Shuffling the deck...</p>
+            </div>
             <div id="cards-container" class="w-full flex justify-center">
-                <div class="text-center text-slate-500 mt-20">
-                    <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                    <p data-i18n="placeholder">Select a spread and click "Divinate" to begin.</p>
+                <div class="text-center mt-16 float" style="color: var(--muted)">
+                    <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-40" style="color: var(--gold)"></i>
+                    <p class="italic" data-i18n="placeholder">Select a spread and click "Divinate" to begin.</p>
                 </div>
             </div>
         </div>
 
-        <div id="reading-area" class="w-full max-w-4xl mt-12 hidden">
-            <h2 class="text-2xl text-amber-400 mb-6 text-center border-b border-slate-700 pb-2" data-i18n="readingTitle">Reading Interpretation</h2>
-            <div id="reading-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div id="reading-area" class="w-full max-w-4xl mt-14 hidden">
+            <div id="verdict" class="verdict glass mb-8 hidden"></div>
+
+            <div class="text-center mb-8">
+                <div class="ornament text-xs mb-3"><i data-lucide="sparkle" class="w-4 h-4"></i></div>
+                <h2 class="text-2xl md:text-3xl title-gold tracking-wider" data-i18n="readingTitle">Reading Interpretation</h2>
+                <p id="asked" class="italic mt-3 hidden text-lg" style="color: var(--muted)"></p>
+            </div>
+
+            <div id="reading-content" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+
+            <div class="flex flex-wrap justify-center gap-3 mt-10">
+                <button onclick="drawCards()" class="btn-ghost"><i data-lucide="refresh-cw" class="w-4 h-4"></i> <span data-i18n="drawAgain">Draw again</span></button>
             </div>
         </div>
     </main>
 
-    <footer class="mt-auto py-6 text-slate-500 text-xs text-center w-full border-t border-slate-800">
-        <p data-i18n="footer">&copy; 2025 Arcane Tarot. All 78 Cards Included.</p>
+    <footer class="mt-auto py-8 text-xs text-center w-full" style="color: var(--muted); border-top: 1px solid rgba(212,175,55,0.12)">
+        <p data-i18n="footer">&copy; 2026 Arcane Tarot. All 78 Cards Included.</p>
     </footer>
 
     <script>
@@ -303,19 +905,27 @@
                 title: "Free Tarot Fortune Teller",
                 subtitle: "Reveal your path through the cards",
                 spreadType: "Spread Type",
-                spread3: "Three Card Spread (Past, Present, Future/3 cards Yes or No)",
-                spread10: "Celtic Cross (Comprehensive)",
-                spread1: "Single Card (Daily Draw/1 card Yes or No)",
                 divinate: "Divinate",
                 shuffling: "Shuffling the deck...",
                 placeholder: 'Select a spread and click "Divinate" to begin.',
                 readingTitle: "Reading Interpretation",
-                footer: "© 2025 Arcane Tarot. All 78 Cards Included.",
+                footer: "© 2026 Arcane Tarot. All 78 Cards Included.",
                 upright: "Upright",
                 reversed: "Reversed",
                 yesNo: "Yes or No:",
                 na: "N/A",
                 toggleLabel: "中文",
+                questionLabel: "Your question (optional)",
+                questionPlaceholder: "Will the path I'm on lead somewhere good?",
+                tile1Name: "Single Card", tile1Desc: "Daily draw or a quick yes / no",
+                tile3Name: "Three Card", tile3Desc: "Past · Present · Future",
+                tile10Name: "Celtic Cross", tile10Desc: "Ten cards, the full picture",
+                theCardsSay: "The cards say",
+                verdictYes: "Yes", verdictNo: "No", verdictMaybe: "Maybe",
+                leaningYes: "Leaning Yes", leaningNo: "Leaning No", leaningUncertain: "Uncertain",
+                youAsked: "You asked:",
+                drawAgain: "Draw again",
+                majorArcana: "Major Arcana", suitWands: "Wands", suitCups: "Cups", suitSwords: "Swords", suitPentacles: "Pentacles",
                 spreads: {
                     1: [
                         { name: "Daily Insight", desc: "The energy surrounding you today." }
@@ -344,19 +954,27 @@
                 title: "免费塔罗占卜",
                 subtitle: "让牌卡揭示你的道路",
                 spreadType: "牌阵类型",
-                spread3: "三张牌阵（过去、现在、未来 / 三张是非牌）",
-                spread10: "凯尔特十字（全面解读）",
-                spread1: "单张牌（每日一抽 / 一张是非牌）",
                 divinate: "开始占卜",
                 shuffling: "正在洗牌...",
                 placeholder: "选择牌阵并点击「开始占卜」开始。",
                 readingTitle: "牌义解读",
-                footer: "© 2025 Arcane Tarot。包含全部 78 张牌。",
+                footer: "© 2026 Arcane Tarot。包含全部 78 张牌。",
                 upright: "正位",
                 reversed: "逆位",
                 yesNo: "是 / 否：",
                 na: "无",
                 toggleLabel: "EN",
+                questionLabel: "你的问题（可选）",
+                questionPlaceholder: "我现在走的路会通向好的地方吗？",
+                tile1Name: "单张牌", tile1Desc: "每日一抽或快速是非",
+                tile3Name: "三张牌", tile3Desc: "过去 · 现在 · 未来",
+                tile10Name: "凯尔特十字", tile10Desc: "十张牌，全面解读",
+                theCardsSay: "牌卡的回答",
+                verdictYes: "是", verdictNo: "否", verdictMaybe: "尚不明朗",
+                leaningYes: "倾向「是」", leaningNo: "倾向「否」", leaningUncertain: "难以断定",
+                youAsked: "你问：",
+                drawAgain: "再抽一次",
+                majorArcana: "大阿尔卡纳", suitWands: "权杖", suitCups: "圣杯", suitSwords: "宝剑", suitPentacles: "星币",
                 spreads: {
                     1: [
                         { name: "每日启示", desc: "今天围绕着你的能量。" }
@@ -488,6 +1106,9 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 el.textContent = t(el.getAttribute('data-i18n'));
             });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+            });
             document.getElementById('lang-toggle-label').textContent = t('toggleLabel');
             if (lastDraw) renderDraw(lastDraw, true);
         }
@@ -546,132 +1167,252 @@
             return array;
         }
 
-        async function drawCards() {
-            if (!fullDeck || fullDeck.length === 0) {
-                loadCards();
-            }
+        // ---------- Spread selection ----------
+        let selectedSpread = 1;
+        try { const s = parseInt(localStorage.getItem('tarotSpread')); if ([1, 3, 10].includes(s)) selectedSpread = s; } catch (e) {}
 
-            const spreadType = parseInt(document.getElementById('spread-select').value);
+        function selectSpread(n) {
+            selectedSpread = n;
+            try { localStorage.setItem('tarotSpread', String(n)); } catch (e) {}
+            document.querySelectorAll('.spread-tile').forEach(tile => {
+                const active = parseInt(tile.dataset.spread) === n;
+                tile.classList.toggle('active', active);
+                tile.setAttribute('aria-checked', active ? 'true' : 'false');
+            });
+        }
+
+        // ---------- Yes / No classification ----------
+        function classifyAnswer(text) {
+            const s = (text || '').trim().toLowerCase();
+            if (!s) return 'na';
+            if (/^(yes|是)/.test(s)) return 'yes';
+            if (/^(no|否|not yet|尚未)/.test(s)) return 'no';
+            return 'maybe';
+        }
+
+        function answerFor(card, isReversed) {
+            return (isReversed ? cardText(card, 'yn_reversed') : cardText(card, 'yn_upright')) || '';
+        }
+
+        function verdictLabel(kind) {
+            return { yes: t('verdictYes'), no: t('verdictNo'), maybe: t('verdictMaybe'), na: t('na') }[kind];
+        }
+
+        function chipHtml(kind, text) {
+            const icon = { yes: 'check', no: 'x', maybe: 'help-circle', na: 'minus' }[kind];
+            return `<span class="chip ${kind}"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i>${text}</span>`;
+        }
+
+        function renderVerdict(draw) {
+            const el = document.getElementById('verdict');
+            const { spreadType, drawn } = draw;
+            el.className = 'verdict glass mb-8 hidden';
+            el.innerHTML = '';
+
+            if (spreadType === 1) {
+                const { card, isReversed } = drawn[0];
+                const answer = answerFor(card, isReversed);
+                const kind = classifyAnswer(answer);
+                if (kind === 'na') return;
+                el.classList.add(kind);
+                el.innerHTML = `
+                    <div class="text-xs tracking-[.25em] uppercase mb-2" style="color: var(--muted)">${t('theCardsSay')}</div>
+                    <div class="headline">${verdictLabel(kind)}</div>
+                    ${answer.trim().toLowerCase() !== verdictLabel(kind).toLowerCase() ? `<p class="mt-3 text-lg italic" style="color: var(--text)">${answer}</p>` : ''}
+                `;
+            } else if (spreadType === 3) {
+                const kinds = drawn.map(({ card, isReversed }) => classifyAnswer(answerFor(card, isReversed)));
+                const yes = kinds.filter(k => k === 'yes').length;
+                const no = kinds.filter(k => k === 'no').length;
+                let kind = 'maybe', label = t('leaningUncertain');
+                if (yes > no) { kind = 'yes'; label = t('leaningYes'); }
+                else if (no > yes) { kind = 'no'; label = t('leaningNo'); }
+                el.classList.add(kind);
+                const positions = getSpreads(3);
+                el.innerHTML = `
+                    <div class="text-xs tracking-[.25em] uppercase mb-2" style="color: var(--muted)">${t('theCardsSay')}</div>
+                    <div class="headline">${label}</div>
+                    <div class="flex flex-wrap justify-center gap-2 mt-4">
+                        ${kinds.map((k, i) => chipHtml(k, `${positions[i].name}: ${verdictLabel(k)}`)).join('')}
+                    </div>
+                `;
+            } else {
+                return;
+            }
+            el.classList.remove('hidden');
+        }
+
+        // ---------- Drawing ----------
+        async function drawCards() {
+            if (!fullDeck || fullDeck.length === 0) loadCards();
+
+            const spreadType = selectedSpread;
             const cardsContainer = document.getElementById('cards-container');
             const loading = document.getElementById('loading');
             const readingArea = document.getElementById('reading-area');
-            const readingContent = document.getElementById('reading-content');
+            const btn = document.getElementById('draw-btn');
+            const question = document.getElementById('question').value.trim();
 
+            btn.disabled = true;
             cardsContainer.innerHTML = '';
+            document.getElementById('spread-area').className = 'w-full flex justify-center min-h-[380px]';
             readingArea.classList.add('hidden');
-            readingContent.innerHTML = '';
             loading.classList.remove('hidden');
+            document.getElementById('spread-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 1400));
             loading.classList.add('hidden');
+            btn.disabled = false;
 
-            let deck = shuffle([...fullDeck]);
-            let drawn = [];
+            const deck = shuffle([...fullDeck]);
+            const drawn = [];
             for (let i = 0; i < spreadType; i++) {
                 drawn.push({ card: deck.pop(), isReversed: Math.random() < 0.5 });
             }
 
-            lastDraw = { spreadType, drawn };
+            lastDraw = { spreadType, drawn, question };
             renderDraw(lastDraw, false);
-            document.getElementById('spread-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function renderDraw(draw, instant) {
-            const { spreadType, drawn } = draw;
+            const { spreadType, drawn, question } = draw;
             const spreadArea = document.getElementById('spread-area');
             const cardsContainer = document.getElementById('cards-container');
             const readingArea = document.getElementById('reading-area');
             const readingContent = document.getElementById('reading-content');
+            const asked = document.getElementById('asked');
             const positions = getSpreads(spreadType);
 
             cardsContainer.innerHTML = '';
             readingContent.innerHTML = '';
 
-            if (spreadType === 10) {
-                spreadArea.className = instant ? 'celtic-cross-grid' : 'celtic-cross-grid fade-in';
-            } else {
-                spreadArea.className = instant ? 'spread-container' : 'spread-container fade-in';
-            }
+            const layout = spreadType === 10 ? 'celtic-cross-grid' : 'spread-container';
+            spreadArea.className = instant ? layout : `${layout} fade-in`;
+            cardsContainer.className = 'contents';
 
             drawn.forEach(({ card, isReversed }, i) => {
                 const pos = positions[i];
                 const cardEl = createCardElement(card, isReversed, i, spreadType, pos.name, instant);
+                cardEl.addEventListener('click', () => focusReading(i));
                 cardsContainer.appendChild(cardEl);
 
-                const readingItem = document.createElement('div');
-                readingItem.className = 'bg-slate-800 p-4 rounded border border-slate-700 hover:border-amber-500 transition-colors';
-                readingItem.innerHTML = `
-                    <h3 class="text-amber-400 font-bold mb-1">${i+1}. ${pos.name}</h3>
-                    <p class="text-slate-400 text-sm mb-2 italic">${pos.desc}</p>
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="font-bold text-lg text-slate-200">${cardText(card, 'name')}</span>
-                        <span class="text-xs px-2 py-0.5 rounded ${isReversed ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}">
-                            ${isReversed ? t('reversed') : t('upright')}
+                const suitClass = card.type === 'Major' ? 'major' : card.suit.toLowerCase();
+                const answer = answerFor(card, isReversed);
+                const kind = classifyAnswer(answer);
+
+                const item = document.createElement('div');
+                item.className = `reading-item glass ${suitClass}`;
+                item.id = `reading-${i}`;
+                item.style.animationDelay = instant ? '0s' : `${0.4 + i * 0.15}s`;
+                if (!instant) item.classList.add('fade-in');
+                item.innerHTML = `
+                    <div class="reading-num">${toRomanAny(i + 1)}</div>
+                    <div class="reading-pos mb-1">${i + 1}. ${pos.name}</div>
+                    <p class="reading-desc mb-3">${pos.desc}</p>
+                    <div class="flex items-center flex-wrap gap-2 mb-3">
+                        <span class="reading-card-name">${cardText(card, 'name')}</span>
+                        <span class="chip ${isReversed ? 'no' : 'yes'}">
+                            <i data-lucide="${isReversed ? 'arrow-down' : 'arrow-up'}" class="w-3.5 h-3.5"></i>${isReversed ? t('reversed') : t('upright')}
                         </span>
                     </div>
-                    <p class="text-sm text-slate-300">
-                        ${getCardMeaning(card, isReversed)}
-                    </p>
-                    <p class="text-xs font-bold text-amber-400 mt-1">
-                        ${t('yesNo')} ${(isReversed ? cardText(card, 'yn_reversed') : cardText(card, 'yn_upright')) || t('na')}
-                    </p>
+                    <p class="reading-meaning mb-3">${getCardMeaning(card, isReversed)}</p>
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="text-xs tracking-[.15em] uppercase" style="color: var(--gold)">${t('yesNo')}</span>
+                        ${chipHtml(kind, answer || t('na'))}
+                    </div>
                 `;
-                readingContent.appendChild(readingItem);
+                readingContent.appendChild(item);
             });
 
+            if (spreadType === 10) {
+                const line = document.createElement('div');
+                line.className = 'staff-line';
+                cardsContainer.appendChild(line);
+            }
+
+            if (question) {
+                asked.textContent = `${t('youAsked')} “${question}”`;
+                asked.classList.remove('hidden');
+            } else {
+                asked.classList.add('hidden');
+            }
+
+            renderVerdict(draw);
             readingArea.classList.remove('hidden');
             lucide.createIcons();
         }
 
+        function toRomanAny(n) {
+            const map = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+            let out = '';
+            for (const [v, s] of map) while (n >= v) { out += s; n -= v; }
+            return out;
+        }
+
+        function focusReading(i) {
+            const item = document.getElementById(`reading-${i}`);
+            if (!item) return;
+            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            item.classList.remove('flash');
+            void item.offsetWidth;
+            item.classList.add('flash');
+            document.querySelectorAll('.tarot-card').forEach((c, idx) => c.classList.toggle('highlight', idx === i));
+            setTimeout(() => document.querySelectorAll('.tarot-card').forEach(c => c.classList.remove('highlight')), 1600);
+        }
+
         function createCardElement(card, isReversed, index, spreadType, positionLabel, instant) {
             const wrapper = document.createElement('div');
-            if (spreadType === 10) {
-                wrapper.classList.add(`pos-${index+1}`);
-            }
+            wrapper.className = 'tarot-card' + (spreadType === 10 ? ` pos-${index + 1}` : '') + (instant ? ' instant' : '');
+            wrapper.setAttribute('role', 'button');
+            wrapper.setAttribute('tabindex', '0');
+            wrapper.setAttribute('aria-label', `${index + 1}. ${positionLabel}: ${cardText(card, 'name')}, ${isReversed ? t('reversed') : t('upright')}`);
+            wrapper.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wrapper.click(); } });
 
-            wrapper.className += ` tarot-card group relative`;
-
-            const label = document.createElement('div');
-            label.className = "absolute -top-8 left-0 right-0 text-center text-xs text-amber-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none";
-            label.innerText = `${index+1}. ${positionLabel}`;
-            wrapper.appendChild(label);
+            const stage = document.createElement('div');
+            stage.className = 'card-stage';
 
             const inner = document.createElement('div');
             inner.className = 'card-inner';
 
             const back = document.createElement('div');
             back.className = 'card-face card-back';
-            back.innerHTML = `<div class="w-12 h-12 border-2 border-amber-400/30 rounded-full flex items-center justify-center"><div class="w-8 h-8 border border-amber-400/50 rotate-45"></div></div>`;
+            back.innerHTML = `<div class="emblem"><i data-lucide="moon-star"></i></div>`;
 
+            const suitClass = card.type === 'Major' ? 'major' : card.suit.toLowerCase();
             const front = document.createElement('div');
-            let suitClass = card.suit.toLowerCase();
-            if(card.type === 'Major') suitClass = 'major';
-
             front.className = `card-face card-front ${suitClass}`;
 
-            const content = document.createElement('div');
-            content.className = `card-content flex flex-col items-center justify-between h-full w-full py-2 ${isReversed ? 'reversed' : ''}`;
+            const numeral = card.roman ? card.roman : String(card.number);
+            const suitLabel = card.type === 'Major' ? t('majorArcana') : t('suit' + card.suit);
+            const iconName = card.type === 'Major' ? 'crown' : getIconName(card.suit);
 
-            const topNum = document.createElement('div');
-            topNum.className = "text-sm font-bold opacity-70";
-            topNum.innerText = card.roman ? card.roman : card.number;
+            front.innerHTML = `
+                <div class="card-frame">
+                    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+                </div>
+                <div class="card-content ${isReversed ? 'reversed' : ''}">
+                    <span class="card-num corner-tl">${numeral}</span>
+                    <span class="card-num corner-br">${numeral}</span>
+                    <div class="card-sigil"><i data-lucide="${iconName}"></i></div>
+                    <div>
+                        <div class="card-name">${cardText(card, 'name')}</div>
+                        <div class="card-suit">${suitLabel}</div>
+                    </div>
+                </div>
+            `;
 
-            const iconDiv = document.createElement('div');
-            iconDiv.innerHTML = `<i data-lucide="${getIconName(card.suit)}" class="w-12 h-12 stroke-[1.5]"></i>`;
-            if (card.type === 'Major') iconDiv.innerHTML = `<i data-lucide="crown" class="w-12 h-12 stroke-[1.5] text-purple-600"></i>`;
-
-            const nameDiv = document.createElement('div');
-            nameDiv.className = "tarot-font text-center font-bold text-sm leading-tight";
-            nameDiv.innerText = cardText(card, 'name');
-
-            content.appendChild(topNum);
-            content.appendChild(iconDiv);
-            content.appendChild(nameDiv);
-
-            front.appendChild(content);
             inner.appendChild(back);
             inner.appendChild(front);
-            wrapper.appendChild(inner);
+            stage.appendChild(inner);
+            wrapper.appendChild(stage);
+
+            const caption = document.createElement('div');
+            caption.className = 'card-caption';
+            caption.innerHTML = `
+                <div class="pos">${index + 1}. ${positionLabel}</div>
+                <div class="orient ${isReversed ? 'rev' : 'up'}"><i data-lucide="${isReversed ? 'arrow-down' : 'arrow-up'}"></i>${isReversed ? t('reversed') : t('upright')}</div>
+            `;
+            wrapper.appendChild(caption);
 
             if (instant) {
                 inner.style.transition = 'none';
@@ -679,7 +1420,8 @@
             } else {
                 setTimeout(() => {
                     inner.classList.add('is-flipped');
-                }, 100 + (index * 200));
+                    wrapper.classList.add('revealed');
+                }, 200 + index * 260);
             }
 
             return wrapper;
@@ -687,11 +1429,11 @@
 
         function getIconName(suit) {
             const normalizedSuit = suit ? suit.charAt(0).toUpperCase() + suit.slice(1).toLowerCase() : '';
-            switch(normalizedSuit) {
+            switch (normalizedSuit) {
                 case 'Wands': return 'flame';
-                case 'Cups': return 'glass-water';
+                case 'Cups': return 'wine';
                 case 'Swords': return 'sword';
-                case 'Pentacles': return 'circle-dashed';
+                case 'Pentacles': return 'coins';
                 default: return 'star';
             }
         }
@@ -701,6 +1443,7 @@
             return isReversed ? cardText(card, 'reversed') : cardText(card, 'upright');
         }
 
+        selectSpread(selectedSpread);
         lucide.createIcons();
     </script>
 </body>

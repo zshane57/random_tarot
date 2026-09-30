@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google AdSense -->
@@ -28,7 +28,7 @@
         }
 
         h1, h2, h3, .tarot-font {
-            font-family: 'Cinzel', serif;
+            font-family: 'Cinzel', 'Noto Serif SC', serif;
         }
 
         /* Card Styles */
@@ -156,45 +156,48 @@
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <header class="w-full p-6 text-center border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
-        <h1 class="text-4xl text-amber-400 mb-2 font-bold tracking-wider">Free Tarot Fortune Teller</h1>
-        <p class="text-slate-400 text-sm">Reveal your path through the cards</p>
+    <header class="w-full p-6 text-center border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50 relative">
+        <button id="lang-toggle" onclick="toggleLang()" class="absolute top-4 right-4 md:top-6 md:right-6 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-600 hover:border-amber-400 text-xs font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1" aria-label="Switch language">
+            <i data-lucide="languages" class="w-4 h-4"></i> <span id="lang-toggle-label">中文</span>
+        </button>
+        <h1 class="text-4xl text-amber-400 mb-2 font-bold tracking-wider" data-i18n="title">Free Tarot Fortune Teller</h1>
+        <p class="text-slate-400 text-sm" data-i18n="subtitle">Reveal your path through the cards</p>
     </header>
 
     <main class="w-full max-w-7xl flex flex-col items-center p-4">
         <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700 w-full max-w-2xl mx-auto">
             <div class="flex flex-col w-full md:w-auto">
-                <label class="text-xs text-amber-400 uppercase tracking-widest mb-1">Spread Type</label>
+                <label class="text-xs text-amber-400 uppercase tracking-widest mb-1" data-i18n="spreadType">Spread Type</label>
                 <select id="spread-select" class="bg-slate-900 text-slate-200 border border-slate-600 rounded px-4 py-2 focus:outline-none focus:border-amber-400 w-full md:w-auto">
-                    <option value="3">Three Card Spread (Past, Present, Future/3 cards Yes or No)</option>
-                    <option value="10">Celtic Cross (Comprehensive)</option>
-                    <option value="1" selected>Single Card (Daily Draw/1 card Yes or No)</option>
+                    <option value="3" data-i18n="spread3">Three Card Spread (Past, Present, Future/3 cards Yes or No)</option>
+                    <option value="10" data-i18n="spread10">Celtic Cross (Comprehensive)</option>
+                    <option value="1" selected data-i18n="spread1">Single Card (Daily Draw/1 card Yes or No)</option>
                 </select>
             </div>
             <button onclick="drawCards()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2 px-8 rounded shadow-lg transition-all transform hover:scale-105 mt-auto h-[42px] w-full md:w-auto flex items-center justify-center gap-2">
-                <i data-lucide="sparkles" class="w-4 h-4"></i> Divinate
+                <i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="divinate">Divinate</span>
             </button>
         </div>
 
         <div id="spread-area" class="w-full flex justify-center min-h-[500px]">
-            <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8">Shuffling the deck...</div>
+            <div id="loading" class="hidden text-amber-400 text-xl animate-pulse mb-8" data-i18n="shuffling">Shuffling the deck...</div>
             <div id="cards-container" class="w-full flex justify-center">
                 <div class="text-center text-slate-500 mt-20">
                     <i data-lucide="layers" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                    <p>Select a spread and click "Divinate" to begin.</p>
+                    <p data-i18n="placeholder">Select a spread and click "Divinate" to begin.</p>
                 </div>
             </div>
         </div>
 
         <div id="reading-area" class="w-full max-w-4xl mt-12 hidden">
-            <h2 class="text-2xl text-amber-400 mb-6 text-center border-b border-slate-700 pb-2">Reading Interpretation</h2>
+            <h2 class="text-2xl text-amber-400 mb-6 text-center border-b border-slate-700 pb-2" data-i18n="readingTitle">Reading Interpretation</h2>
             <div id="reading-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             </div>
         </div>
     </main>
 
     <footer class="mt-auto py-6 text-slate-500 text-xs text-center w-full border-t border-slate-800">
-        <p>&copy; 2025 Arcane Tarot. All 78 Cards Included.</p>
+        <p data-i18n="footer">&copy; 2025 Arcane Tarot. All 78 Cards Included.</p>
     </footer>
 
     <script>
@@ -292,7 +295,211 @@
           }
         };
 
+
+        // --- Localisation ---
+        const i18n = {
+            en: {
+                docTitle: "Free Tarot Fortune Teller - Mystic Arcane",
+                title: "Free Tarot Fortune Teller",
+                subtitle: "Reveal your path through the cards",
+                spreadType: "Spread Type",
+                spread3: "Three Card Spread (Past, Present, Future/3 cards Yes or No)",
+                spread10: "Celtic Cross (Comprehensive)",
+                spread1: "Single Card (Daily Draw/1 card Yes or No)",
+                divinate: "Divinate",
+                shuffling: "Shuffling the deck...",
+                placeholder: 'Select a spread and click "Divinate" to begin.',
+                readingTitle: "Reading Interpretation",
+                footer: "© 2025 Arcane Tarot. All 78 Cards Included.",
+                upright: "Upright",
+                reversed: "Reversed",
+                yesNo: "Yes or No:",
+                na: "N/A",
+                toggleLabel: "中文",
+                spreads: {
+                    1: [
+                        { name: "Daily Insight", desc: "The energy surrounding you today." }
+                    ],
+                    3: [
+                        { name: "The Past", desc: "Influences from the past that still affect the situation." },
+                        { name: "The Present", desc: "The current state of affairs and immediate challenges." },
+                        { name: "The Future", desc: "The likely outcome if the current path is followed." }
+                    ],
+                    10: [
+                        { name: "The Present", desc: "The heart of the matter." },
+                        { name: "The Challenge", desc: "The obstacle crossing you (Upright or Reversed)." },
+                        { name: "The Foundation", desc: "Subconscious influences or the root of the issue." },
+                        { name: "The Past", desc: "Recent events that are passing away." },
+                        { name: "The Crown", desc: "Your conscious goals and best potential outcome." },
+                        { name: "The Future", desc: "Immediate future events." },
+                        { name: "Self", desc: "Your attitude and stance towards the issue." },
+                        { name: "Environment", desc: "How others see you or external influences." },
+                        { name: "Hopes & Fears", desc: "Inner psychological state regarding the outcome." },
+                        { name: "Outcome", desc: "The culmination of the reading." }
+                    ]
+                }
+            },
+            zh: {
+                docTitle: "免费塔罗占卜 - Mystic Arcane",
+                title: "免费塔罗占卜",
+                subtitle: "让牌卡揭示你的道路",
+                spreadType: "牌阵类型",
+                spread3: "三张牌阵（过去、现在、未来 / 三张是非牌）",
+                spread10: "凯尔特十字（全面解读）",
+                spread1: "单张牌（每日一抽 / 一张是非牌）",
+                divinate: "开始占卜",
+                shuffling: "正在洗牌...",
+                placeholder: "选择牌阵并点击「开始占卜」开始。",
+                readingTitle: "牌义解读",
+                footer: "© 2025 Arcane Tarot。包含全部 78 张牌。",
+                upright: "正位",
+                reversed: "逆位",
+                yesNo: "是 / 否：",
+                na: "无",
+                toggleLabel: "EN",
+                spreads: {
+                    1: [
+                        { name: "每日启示", desc: "今天围绕着你的能量。" }
+                    ],
+                    3: [
+                        { name: "过去", desc: "仍在影响当前局面的过去因素。" },
+                        { name: "现在", desc: "当前的状况与眼前的挑战。" },
+                        { name: "未来", desc: "若沿着现有道路前行的可能结果。" }
+                    ],
+                    10: [
+                        { name: "现状", desc: "问题的核心。" },
+                        { name: "挑战", desc: "横亘在你面前的障碍（正位或逆位）。" },
+                        { name: "基础", desc: "潜意识的影响或问题的根源。" },
+                        { name: "过去", desc: "正在消逝的近期事件。" },
+                        { name: "冠冕", desc: "你有意识的目标与最佳的可能结果。" },
+                        { name: "未来", desc: "即将发生的事件。" },
+                        { name: "自我", desc: "你对问题的态度与立场。" },
+                        { name: "环境", desc: "他人如何看你，或外在的影响。" },
+                        { name: "希望与恐惧", desc: "对结果的内在心理状态。" },
+                        { name: "结果", desc: "这次解读的最终归结。" }
+                    ]
+                }
+            }
+        };
+
+        // Chinese card text, keyed by card id. Fields fall back to English if missing.
+        const zhCards = {
+            "major-0":  { name: "愚者", upright: "新的开始、冒险、纯真、随性、自由的灵魂", reversed: "鲁莽、天真、浪费潜能、愚蠢", yn_upright: "是", yn_reversed: "否" },
+            "major-1":  { name: "魔术师", upright: "意志力、渴望、足智多谋、力量、受启发的行动", reversed: "操纵、计划不周、未开发的才能、自我怀疑", yn_upright: "是", yn_reversed: "否" },
+            "major-2":  { name: "女祭司", upright: "直觉、神圣的知识、神圣女性、潜意识", reversed: "压抑的直觉、隐藏的意图、需要倾听内心的声音，你知道答案却拒绝接受", yn_upright: "70% 是 / 30% 否", yn_reversed: "70% 否 / 30% 是" },
+            "major-3":  { name: "皇后", upright: "滋养、美丽、丰盛、自然、感性", reversed: "自我批评、忽视、贫瘠、虚荣", yn_upright: "是", yn_reversed: "否" },
+            "major-4":  { name: "皇帝", upright: "权威、结构、掌控、父亲形象、领导力", reversed: "专制、僵化、冷漠、软弱", yn_upright: "是", yn_reversed: "否" },
+            "major-5":  { name: "教皇", upright: "传统、顺从、道德、伦理、美德", reversed: "叛逆、颠覆、非正统", yn_upright: "是", yn_reversed: "否" },
+            "major-6":  { name: "恋人", upright: "关系、选择、契合、价值观、连结", reversed: "分离、不合、失衡、冲突", yn_upright: "是", yn_reversed: "否" },
+            "major-7":  { name: "战车", upright: "掌控、意志力、决心、自律、自信", reversed: "自我怀疑、缺乏方向、怯懦、攻击性", yn_upright: "是", yn_reversed: "否" },
+            "major-8":  { name: "力量", upright: "力量、勇气、耐心、自制、慈悲", reversed: "不安全感、自我怀疑、精力不足、无力感", yn_upright: "是", yn_reversed: "否" },
+            "major-9":  { name: "隐士", upright: "内省、内在指引、独处、探寻灵魂", reversed: "孤立、孤独、退缩、迷失、困于自我之中", yn_upright: "是，但需谨慎 / 延迟的是", yn_reversed: "否" },
+            "major-10": { name: "命运之轮", upright: "幸运、循环、命运、转折点、业力", reversed: "厄运、抗拒改变、打破循环", yn_upright: "是", yn_reversed: "尚未" },
+            "major-11": { name: "正义", upright: "正义、公平、真相、因果、责任", reversed: "不公、腐败、偏见、不负责任", yn_upright: "是", yn_reversed: "否" },
+            "major-12": { name: "倒吊人", upright: "视角、限制、牺牲、暂停、悬置", reversed: "是时候向前走了，别再惩罚自己，放下", yn_upright: "你需要三思，稍后再问", yn_reversed: "你需要三思，稍后再问" },
+            "major-13": { name: "死神", upright: "新的开始、过渡、蜕变、改变", reversed: "抗拒改变、固执、内在转化", yn_upright: "是，伴随改变", yn_reversed: "否，需要改变" },
+            "major-14": { name: "节制", upright: "平衡、节制、平静、耐心、和谐", reversed: "失衡、过度、不和谐、急躁", yn_upright: "是，朝着平衡前进", yn_reversed: "否，你正在失去平衡，放慢脚步找回重心" },
+            "major-15": { name: "恶魔", upright: "贪婪、束缚、疏离、性、物质主义", reversed: "释放、自由、收回、挣脱束缚", yn_upright: "否", yn_reversed: "是" },
+            "major-16": { name: "高塔", upright: "混乱后的新开始、突变、剧变、启示、突破", reversed: "避开的灾难、害怕改变、延迟的崩塌、感到被困", yn_upright: "否", yn_reversed: "是" },
+            "major-17": { name: "星星", upright: "希望、信念、目标、更新、灵性", reversed: "绝望、缺乏信念、缺乏方向、目标未达", yn_upright: "是，有希望，但你需要时间和努力才能到达", yn_reversed: "否" },
+            "major-18": { name: "月亮", upright: "直觉、不确定、幻象、恐惧、潜意识", reversed: "清晰、理解、真相、内在功课", yn_upright: "否，需谨慎，事情并非表面所见", yn_reversed: "否，需谨慎，你的第一步也许是对的，但在下一步之前要小心并做好功课" },
+            "major-19": { name: "太阳", upright: "积极、成功、活力、喜悦、清晰", reversed: "悲伤、消极、错失机会、缺乏清晰", yn_upright: "是", yn_reversed: "否" },
+            "major-20": { name: "审判", upright: "觉醒、更新、宽恕、反思、内在召唤", reversed: "缺乏自我觉察、重蹈覆辙、怀疑、拒绝", yn_upright: "是，相信自己，向前走", yn_reversed: "可能否，慢慢来" },
+            "major-21": { name: "世界", upright: "完成、成就、圆满、满足、旅行", reversed: "未完成、短视、失望、缺乏结束", yn_upright: "是", yn_reversed: "尚未，你需要先完成某件事" },
+
+            "wands-0":  { name: "权杖王牌", upright: "灵感、新机会、成长、潜能、创造力、新开始", reversed: "缺乏方向、缺乏热情、浪费潜能、延误、假性开始、创意受阻", yn_upright: "是", yn_reversed: "否" },
+            "wands-1":  { name: "权杖二", upright: "计划、做决定、离家、漫游", reversed: "不确定、缺乏计划、缺乏方向，你应该退一步重新开始，你还没准备好", yn_upright: "是", yn_reversed: "否" },
+            "wands-2":  { name: "权杖三", upright: "展望未来、扩张、远见、海外机会、自由", reversed: "缺乏远见、延误、错失机会、回家", yn_upright: "是", yn_reversed: "可能否，你也许得寻找其他方向" },
+            "wands-3":  { name: "权杖四", upright: "庆祝、团聚、和谐、家、幸福", reversed: "冲突、分手、分离、计划取消、自我怀疑", yn_upright: "是", yn_reversed: "否" },
+            "wands-4":  { name: "权杖五", upright: "冲突、竞争、紧张、多样性", reversed: "和谐、达成一致、走到一起、化解冲突", yn_upright: "否", yn_reversed: "是" },
+            "wands-5":  { name: "权杖六", upright: "成功、胜利、公众认可、健康的自豪", reversed: "自负、傲慢、名誉受损、失势", yn_upright: "是", yn_reversed: "否" },
+            "wands-6":  { name: "权杖七", upright: "坚持、防御、挑战、保持掌控", reversed: "放弃、缺乏防御、动摇", yn_upright: "是", yn_reversed: "否" },
+            "wands-7":  { name: "权杖八", upright: "行动、速度、进展、快速变化、旅行、成就", reversed: "延误、挫折、争执、停滞", yn_upright: "是", yn_reversed: "否，需留意" },
+            "wands-8":  { name: "权杖九", upright: "韧性、坚持、界限、疲惫", reversed: "精疲力竭、防御心重、固执", yn_upright: "是，是时候放手了", yn_reversed: "否" },
+            "wands-9":  { name: "权杖十", upright: "负担、不堪重负、责任、辛劳、压力", reversed: "卸下负担、缺乏责任感、不负责任", yn_upright: "否", yn_reversed: "是，你已尽了本分，现在是时候放手向前了" },
+            "wands-10": { name: "权杖侍从", upright: "探索、兴奋、自由、纯真、发现", reversed: "缺乏方向、天真、缺乏想象力、躁动不安", yn_upright: "是", yn_reversed: "否" },
+            "wands-11": { name: "权杖骑士", upright: "冒险、热情、活力、冲动", reversed: "傲慢、鲁莽、嫉妒、急躁", yn_upright: "是", yn_reversed: "否" },
+            "wands-12": { name: "权杖王后", upright: "自信、独立、决心、魅力", reversed: "自我怀疑、缺乏方向、自卑、嫉妒", yn_upright: "是", yn_reversed: "否" },
+            "wands-13": { name: "权杖国王", upright: "领导力、远见、创业精神、大胆", reversed: "专制、鲁莽、缺乏远见", yn_upright: "是", yn_reversed: "否" },
+
+            "cups-0":  { name: "圣杯王牌", upright: "新的情感、慈悲、创造力、直觉、灵性觉醒、新开始", reversed: "情感失落、创意受阻、缺乏流动、关系问题", yn_upright: "是", yn_reversed: "否" },
+            "cups-1":  { name: "圣杯二", upright: "伙伴关系、相互吸引、亲密、平等、连结", reversed: "失衡、关系紧张、误解、不和", yn_upright: "是", yn_reversed: "否" },
+            "cups-2":  { name: "圣杯三", upright: "庆祝、友谊、创造力、社群", reversed: "孤立、孤独、精力分散", yn_upright: "是，需谨慎", yn_reversed: "否，你应该提防身边的某个人" },
+            "cups-3":  { name: "圣杯四", upright: "冷漠、缺乏觉察、幻象、白日梦", reversed: "接纳、允许、新视角", yn_upright: "否", yn_reversed: "是" },
+            "cups-4":  { name: "圣杯五", upright: "失去、悲伤、哀痛、丧亲、失望", reversed: "接纳、向前走、宽恕、重聚", yn_upright: "否", yn_reversed: "是" },
+            "cups-5":  { name: "圣杯六", upright: "怀旧、简单、童年、熟悉、回家", reversed: "渴望、距离、放下、未来、离家、困在过去", yn_upright: "是", yn_reversed: "否，需谨慎，你太困在过去了，是时候放下向前走，但要小心，你可能需要先做一些内在功课才能前进" },
+            "cups-6":  { name: "圣杯七", upright: "白日梦、选择、一厢情愿、幻象、疯狂", reversed: "清晰、幻灭、觉醒、残酷的真相", yn_upright: "否", yn_reversed: "是" },
+            "cups-7":  { name: "圣杯八", upright: "向前走、放下、离弃、逃避", reversed: "无法向前、害怕离开、情感依赖", yn_upright: "否，你应该放手", yn_reversed: "是" },
+            "cups-8":  { name: "圣杯九", upright: "幸福、满足、满意、感恩", reversed: "不满、缺乏成就感、傲慢、贪婪", yn_upright: "是", yn_reversed: "否" },
+            "cups-9":  { name: "圣杯十", upright: "和谐、家庭、关系、社群、归属", reversed: "冲突、不和、家庭危机、破裂", yn_upright: "是", yn_reversed: "否" },
+            "cups-10": { name: "圣杯侍从", upright: "好奇、邀请、想象力、青春、天真、浪漫", reversed: "封闭、缺乏想象力、冷漠、幼稚", yn_upright: "是", yn_reversed: "否" },
+            "cups-11": { name: "圣杯骑士", upright: "理想主义、魅力、优雅、想象力、少年气", reversed: "心碎、情绪化、反复无常、不成熟", yn_upright: "是", yn_reversed: "否" },
+            "cups-12": { name: "圣杯王后", upright: "慈悲、平静、滋养、敏感、直觉", reversed: "情感不安、内心动荡、不安全感", yn_upright: "是", yn_reversed: "否" },
+            "cups-13": { name: "圣杯国王", upright: "情感平衡、直觉、外交手腕、责任感", reversed: "情感操纵、反复无常、情绪化", yn_upright: "是", yn_reversed: "否" },
+
+            "swords-0":  { name: "宝剑王牌", upright: "清晰、突破、新想法、沟通、真相、新开始", reversed: "困惑、不诚实、沟通受阻、误解", yn_upright: "是", yn_reversed: "否" },
+            "swords-1":  { name: "宝剑二", upright: "艰难的选择、犹豫不决、僵局、紧张", reversed: "犹豫不决、清晰、突破、接纳", yn_upright: "否", yn_reversed: "否" },
+            "swords-2":  { name: "宝剑三", upright: "心碎、悲伤、哀痛、痛苦、艰难时期、背叛", reversed: "疗愈、宽恕、向前走、恢复、寻求支持", yn_upright: "否", yn_reversed: "是" },
+            "swords-3":  { name: "宝剑四", upright: "休息、喘息、冥想、沉思、休养", reversed: "躁动、不安、焦虑、失眠、倦怠", yn_upright: "是", yn_reversed: "否" },
+            "swords-4":  { name: "宝剑五", upright: "冲突、失去、背叛、后悔、挫败、暴力", reversed: "和解、解决、内心平静、接纳", yn_upright: "否", yn_reversed: "是" },
+            "swords-5":  { name: "宝剑六", upright: "过渡、旅行、离开、向前走、进展", reversed: "抗拒、被困、无法向前、旅行取消", yn_upright: "是", yn_reversed: "否" },
+            "swords-6":  { name: "宝剑七", upright: "欺骗、背叛、狡诈、不诚实、鬼祟", reversed: "坦白、诚实、真诚、寻求真相", yn_upright: "否，需谨慎，可能有隐藏的意图，小心", yn_reversed: "是，需谨慎，可能存在不诚实和欺骗" },
+            "swords-7":  { name: "宝剑八", upright: "限制、困惑、无力、受害者心态", reversed: "自由、释放、挣脱、赋权", yn_upright: "否", yn_reversed: "是" },
+            "swords-8":  { name: "宝剑九", upright: "焦虑、担忧、噩梦、压力、恐惧", reversed: "焦虑缓解、希望、摆脱担忧", yn_upright: "否", yn_reversed: "是" },
+            "swords-9":  { name: "宝剑十", upright: "结束、失去、挫败、受害、背叛", reversed: "恢复、接纳、结束、新开始", yn_upright: "否", yn_reversed: "是" },
+            "swords-10": { name: "宝剑侍从", upright: "好奇、新想法、求知欲、沟通、青春", reversed: "冲动、欠考虑、伤人的言语", yn_upright: "是", yn_reversed: "否" },
+            "swords-11": { name: "宝剑骑士", upright: "理智、沟通、逻辑、追求真相", reversed: "攻击性、欺骗、操纵、好争辩", yn_upright: "是", yn_reversed: "否" },
+            "swords-12": { name: "宝剑王后", upright: "智慧、独立、逻辑、洞察、优雅、保护", reversed: "冷漠、苦涩、操纵、严厉、爱评判", yn_upright: "是", yn_reversed: "否" },
+            "swords-13": { name: "宝剑国王", upright: "理智、权威、真相、逻辑、分析、智慧", reversed: "残酷、攻击性、严厉、冷漠", yn_upright: "是", yn_reversed: "否" },
+
+            "pentacles-0":  { name: "星币王牌", upright: "新机会、繁荣、丰盛、好运、新开始", reversed: "错失机会、资源匮乏、稀缺、过度消费、财务混乱", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-1":  { name: "星币二", upright: "平衡、适应力、时间管理、优先排序", reversed: "失衡、缺乏适应力、混乱无序", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-2":  { name: "星币三", upright: "团队合作、协作、学习、建设、工艺", reversed: "缺乏协作、缺乏团队精神、不和谐", yn_upright: "是", yn_reversed: "否，你应该提防身边的某个人" },
+            "pentacles-3":  { name: "星币四", upright: "保守、控制、占有欲、物质主义、吝啬", reversed: "放手、分享、慷慨、释放、赌博、冒险", yn_upright: "否", yn_reversed: "是" },
+            "pentacles-4":  { name: "星币五", upright: "财务困难、贫困、缺乏支持、被遗弃、失业", reversed: "恢复、援助、丰盛、接纳、还清债务", yn_upright: "否", yn_reversed: "是" },
+            "pentacles-5":  { name: "星币六", upright: "慷慨、回报、慈善、分享、公平、感恩", reversed: "吝啬、缺乏慷慨、不平等、滥用权力、贪婪", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-6":  { name: "星币七", upright: "坚持、投资获得回报、辛劳得到报偿、成长、耐心", reversed: "短视、缺乏成长、缺乏投入、成果有限", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-7":  { name: "星币八", upright: "技能、工艺、专业、学徒、注重细节，你的努力会有回报", reversed: "缺乏技能、缺乏专注、效率低下", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-8":  { name: "星币九", upright: "丰盛、繁荣、奢华、独立、自信", reversed: "失去自由、缺乏独立、不安全感、骗局、虚假的成功", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-9":  { name: "星币十", upright: "财富、家庭、继承、传承、丰盛、财务稳定", reversed: "损失、缺乏结束、家庭冲突", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-10": { name: "星币侍从", upright: "抱负、求知欲、阅读、学识、天赋、显化、新工作、新机会", reversed: "缺乏方向、缺乏动力、急躁、不成熟、拖延", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-11": { name: "星币骑士", upright: "可靠、勤奋、传统、责任感、忠诚、效率", reversed: "不可靠、缺乏成长、拖延、不负责任、懒惰", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-12": { name: "星币王后", upright: "务实、物质享受、滋养、独立", reversed: "缺乏滋养、缺乏独立、不安全感、操纵", yn_upright: "是", yn_reversed: "否" },
+            "pentacles-13": { name: "星币国王", upright: "丰盛、繁荣、安全、领导力、权威", reversed: "缺乏丰盛、缺乏安全感、不配得感、腐败、贪婪", yn_upright: "是", yn_reversed: "否" }
+        };
+
+        let currentLang = 'en';
+        try { currentLang = localStorage.getItem('tarotLang') === 'zh' ? 'zh' : 'en'; } catch (e) {}
+
+        function t(key) {
+            return (i18n[currentLang] && i18n[currentLang][key] !== undefined) ? i18n[currentLang][key] : i18n.en[key];
+        }
+
+        function cardText(card, field) {
+            if (currentLang === 'zh' && zhCards[card.id] && zhCards[card.id][field]) {
+                return zhCards[card.id][field];
+            }
+            return card[field];
+        }
+
+        function applyLang() {
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+            document.title = t('docTitle');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.getAttribute('data-i18n'));
+            });
+            document.getElementById('lang-toggle-label').textContent = t('toggleLabel');
+            if (lastDraw) renderDraw(lastDraw, true);
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            try { localStorage.setItem('tarotLang', currentLang); } catch (e) {}
+            applyLang();
+        }
+
         let fullDeck = [];
+        let lastDraw = null;
 
         function toRoman(num) {
             const romans = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
@@ -321,30 +528,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadCards();
+            applyLang();
         });
 
-        const spreads = {
-            1: [
-                { name: "Daily Insight", desc: "The energy surrounding you today." }
-            ],
-            3: [
-                { name: "The Past", desc: "Influences from the past that still affect the situation." },
-                { name: "The Present", desc: "The current state of affairs and immediate challenges." },
-                { name: "The Future", desc: "The likely outcome if the current path is followed." }
-            ],
-            10: [
-                { name: "The Present", desc: "The heart of the matter." },
-                { name: "The Challenge", desc: "The obstacle crossing you (Upright or Reversed)." },
-                { name: "The Foundation", desc: "Subconscious influences or the root of the issue." },
-                { name: "The Past", desc: "Recent events that are passing away." },
-                { name: "The Crown", desc: "Your conscious goals and best potential outcome." },
-                { name: "The Future", desc: "Immediate future events." },
-                { name: "Self", desc: "Your attitude and stance towards the issue." },
-                { name: "Environment", desc: "How others see you or external influences." },
-                { name: "Hopes & Fears", desc: "Inner psychological state regarding the outcome." },
-                { name: "Outcome", desc: "The culmination of the reading." }
-            ]
-        };
+        function getSpreads(spreadType) {
+            return t('spreads')[spreadType];
+        }
 
         function shuffle(array) {
             let currentIndex = array.length,  randomIndex;
@@ -363,7 +552,6 @@
             }
 
             const spreadType = parseInt(document.getElementById('spread-select').value);
-            const spreadArea = document.getElementById('spread-area');
             const cardsContainer = document.getElementById('cards-container');
             const loading = document.getElementById('loading');
             const readingArea = document.getElementById('reading-area');
@@ -379,48 +567,63 @@
 
             let deck = shuffle([...fullDeck]);
             let drawn = [];
-
-            if (spreadType === 10) {
-                spreadArea.className = 'celtic-cross-grid fade-in';
-            } else {
-                spreadArea.className = 'spread-container fade-in';
+            for (let i = 0; i < spreadType; i++) {
+                drawn.push({ card: deck.pop(), isReversed: Math.random() < 0.5 });
             }
 
-            for(let i=0; i<spreadType; i++) {
-                let card = deck.pop();
-                let isReversed = Math.random() < 0.5;
-                drawn.push({ ...card, isReversed, positionName: spreads[spreadType][i].name, positionDesc: spreads[spreadType][i].desc });
+            lastDraw = { spreadType, drawn };
+            renderDraw(lastDraw, false);
+            document.getElementById('spread-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-                const cardEl = createCardElement(card, isReversed, i, spreadType, spreads[spreadType][i].name);
+        function renderDraw(draw, instant) {
+            const { spreadType, drawn } = draw;
+            const spreadArea = document.getElementById('spread-area');
+            const cardsContainer = document.getElementById('cards-container');
+            const readingArea = document.getElementById('reading-area');
+            const readingContent = document.getElementById('reading-content');
+            const positions = getSpreads(spreadType);
+
+            cardsContainer.innerHTML = '';
+            readingContent.innerHTML = '';
+
+            if (spreadType === 10) {
+                spreadArea.className = instant ? 'celtic-cross-grid' : 'celtic-cross-grid fade-in';
+            } else {
+                spreadArea.className = instant ? 'spread-container' : 'spread-container fade-in';
+            }
+
+            drawn.forEach(({ card, isReversed }, i) => {
+                const pos = positions[i];
+                const cardEl = createCardElement(card, isReversed, i, spreadType, pos.name, instant);
                 cardsContainer.appendChild(cardEl);
 
                 const readingItem = document.createElement('div');
                 readingItem.className = 'bg-slate-800 p-4 rounded border border-slate-700 hover:border-amber-500 transition-colors';
                 readingItem.innerHTML = `
-                    <h3 class="text-amber-400 font-bold mb-1">${i+1}. ${spreads[spreadType][i].name}</h3>
-                    <p class="text-slate-400 text-sm mb-2 italic">${spreads[spreadType][i].desc}</p>
+                    <h3 class="text-amber-400 font-bold mb-1">${i+1}. ${pos.name}</h3>
+                    <p class="text-slate-400 text-sm mb-2 italic">${pos.desc}</p>
                     <div class="flex items-center gap-2 mb-2">
-                        <span class="font-bold text-lg text-slate-200">${card.name}</span>
+                        <span class="font-bold text-lg text-slate-200">${cardText(card, 'name')}</span>
                         <span class="text-xs px-2 py-0.5 rounded ${isReversed ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}">
-                            ${isReversed ? 'Reversed' : 'Upright'}
+                            ${isReversed ? t('reversed') : t('upright')}
                         </span>
                     </div>
                     <p class="text-sm text-slate-300">
                         ${getCardMeaning(card, isReversed)}
                     </p>
                     <p class="text-xs font-bold text-amber-400 mt-1">
-                        Yes or No: ${isReversed ? (card.yn_reversed || 'N/A') : (card.yn_upright || 'N/A')}
+                        ${t('yesNo')} ${(isReversed ? cardText(card, 'yn_reversed') : cardText(card, 'yn_upright')) || t('na')}
                     </p>
                 `;
                 readingContent.appendChild(readingItem);
-            }
+            });
 
             readingArea.classList.remove('hidden');
             lucide.createIcons();
-            spreadArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        function createCardElement(card, isReversed, index, spreadType, positionLabel) {
+        function createCardElement(card, isReversed, index, spreadType, positionLabel, instant) {
             const wrapper = document.createElement('div');
             if (spreadType === 10) {
                 wrapper.classList.add(`pos-${index+1}`);
@@ -459,7 +662,7 @@
 
             const nameDiv = document.createElement('div');
             nameDiv.className = "tarot-font text-center font-bold text-sm leading-tight";
-            nameDiv.innerText = card.name;
+            nameDiv.innerText = cardText(card, 'name');
 
             content.appendChild(topNum);
             content.appendChild(iconDiv);
@@ -470,9 +673,14 @@
             inner.appendChild(front);
             wrapper.appendChild(inner);
 
-            setTimeout(() => {
+            if (instant) {
+                inner.style.transition = 'none';
                 inner.classList.add('is-flipped');
-            }, 100 + (index * 200));
+            } else {
+                setTimeout(() => {
+                    inner.classList.add('is-flipped');
+                }, 100 + (index * 200));
+            }
 
             return wrapper;
         }
@@ -490,7 +698,7 @@
 
         function getCardMeaning(card, isReversed) {
             if (!card) return '';
-            return isReversed ? card.reversed : card.upright;
+            return isReversed ? cardText(card, 'reversed') : cardText(card, 'upright');
         }
 
         lucide.createIcons();
